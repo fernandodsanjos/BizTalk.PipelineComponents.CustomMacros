@@ -1,0 +1,4 @@
+C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\bin\Debug\XSLTransform.Map.dll
+C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\bin\Debug\XSLTransform.Map.pdb
+C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\obj\Debug\XSLTransform.Map.dll
+C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\obj\Debug\XSLTransform.Map.pdb

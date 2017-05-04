@@ -1,0 +1,5 @@
+C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\bin\Debug\BizTalkComponents.PipelineComponents.CustomMacros.dll
+C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\bin\Debug\BizTalkComponents.PipelineComponents.CustomMacros.pdb
+C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.csprojResolveAssemblyReference.cache
+C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.dll
+C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.pdb

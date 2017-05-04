@@ -1,0 +1,5 @@
+C:\work\BizTalkComponents.PipelineComponents\XSLTransform.Pipeline\bin\Debug\XSLTransform.Pipeline.dll
+C:\work\BizTalkComponents.PipelineComponents\XSLTransform.Pipeline\bin\Debug\XSLTransform.Pipeline.pdb
+C:\work\BizTalkComponents.PipelineComponents\XSLTransform.Pipeline\bin\Debug\BizTalkComponents.PipelineComponents.XSLTransform.dll
+C:\work\BizTalkComponents.PipelineComponents\XSLTransform.Pipeline\obj\Debug\XSLTransform.Pipeline.dll
+C:\work\BizTalkComponents.PipelineComponents\XSLTransform.Pipeline\obj\Debug\XSLTransform.Pipeline.pdb
