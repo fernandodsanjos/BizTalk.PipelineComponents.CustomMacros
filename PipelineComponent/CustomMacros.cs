@@ -31,11 +31,13 @@ namespace BizTalkComponents.PipelineComponents
     public partial class CustomMacros : IBaseComponent
     {
         Dictionary<string,string> propertys = new Dictionary<string,string>();
+        
 
         readonly string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
         readonly string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
         readonly string macros = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\(\D*\.\D*\)%";
-        
+
+
         public CustomMacros()
         {
             propertys = new Dictionary<string,string>();
@@ -103,9 +105,22 @@ namespace BizTalkComponents.PipelineComponents
                  }
 
             }
-                   // System.Diagnostics.Debug.WriteLine("No match for map could be made for message type: " + messageType);
+                   
+            
+            if (transport.Contains("%Folder%"))
+            {
+                transport = transport.Replace("%Folder%", @"\");
 
-            transport = transport.Replace("%Folder%", @"\");
+                string transportType = (string)pInMsg.Context.Read("OutboundTransportType", ns_BTS);
+
+                if(transportType == "FILE")
+                {
+                    string dirname = Path.GetDirectoryName(transport);
+                    //Will create the new directory structure if it does not exist, only applies to FOLDER
+                    System.IO.Directory.CreateDirectory(dirname);
+                }
+                
+            }
 
             pInMsg.Context.Promote("OutboundTransportLocation", ns_BTS, (object)transport);
 
@@ -118,13 +133,36 @@ namespace BizTalkComponents.PipelineComponents
 
         #region Private methods
 
+        object InitCustomMacros(IBaseMessage msg,string ctxName)
+        {
+            object val = null;
+
+                for (int i = 0; i < msg.Context.CountProperties; i++)
+                {
+                    string name = String.Empty;
+                    string ns = String.Empty;
+
+                    val = msg.Context.ReadAt(i, out name, out ns);
+
+                    if (ns.StartsWith("http://schemas.microsoft.com/BizTalk/") == false && ctxName == name)
+                    {
+                        break;
+                    }
+                       
+
+                }
+
+                return val; 
+            
+        }
+
         string GetContext(string input, Match match, IBaseMessage msg)
         {
             //format %Context(BTS.InterchangeID)%
             Match innerMatch = Regex.Match(match.Value, @"%Context\((.*)\)%");
             string innerValue = String.Empty;
-
-            
+            object val = null;
+           
 
             foreach (Group item in innerMatch.Groups)
             {
@@ -138,13 +176,22 @@ namespace BizTalkComponents.PipelineComponents
 
             string[] context = innerValue.Split('.');
 
-            string ns = propertys[context[0]];
+            string ns = String.Empty;
+            propertys.TryGetValue(context[0], out ns);
+             
 
-            if (String.IsNullOrWhiteSpace(ns))
+            if (String.IsNullOrWhiteSpace(ns) && context[0] != "CST")
                 return input.Replace(match.Value, "");
 
-
-            object val = msg.Context.Read(context[1], ns);
+            if(context[0] == "CST")
+            {
+                val = InitCustomMacros(msg, context[1]);
+            }
+            else 
+            { 
+                val = msg.Context.Read(context[1], ns); 
+            }
+            
 
             if (val == null || String.IsNullOrWhiteSpace((string)val))
             { 
