@@ -18,3 +18,5 @@ One of the goals was to not use pipeline properties, just plug-and-play.
                   Example: %DateTime(yyyy)%%Folder%%DateTime(MM)%%Folder%%DateTime(dd)%%Folder%message.xml
                            If the URI is c:\integrations\int0010\ and the current date is 2017-05-04 the final folder
                            and filename will be c:\integrations\int0010\2017\05\04\message.xml
+%ReceivedDateTime(##)% Works like the %DateTime% macro but it uses the AdapterReceiveCompleteTime instead. 
+				To use this macro tracking must be enabled.
