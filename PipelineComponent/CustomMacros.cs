@@ -31,11 +31,11 @@ namespace BizTalkComponents.PipelineComponents
     public partial class CustomMacros : IBaseComponent
     {
         Dictionary<string,string> propertys = new Dictionary<string,string>();
-        
 
+        readonly string ns_Tracking = "http://schemas.microsoft.com/BizTalk/2003/messagetracking-properties";
         readonly string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
         readonly string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
-        readonly string macros = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\(\D*\.\D*\)%";
+        readonly string macros = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\(\D*\.\D*\)%";
 
 
         public CustomMacros()
@@ -52,7 +52,8 @@ namespace BizTalkComponents.PipelineComponents
             propertys.Add("BTF2","http://schemas.microsoft.com/BizTalk/2003/btf2-properties");
             propertys.Add("BTS","http://schemas.microsoft.com/BizTalk/2003/system-properties");
             propertys.Add("FILE","http://schemas.microsoft.com/BizTalk/2003/file-properties");
-
+            propertys.Add("MessageTracking", "http://schemas.microsoft.com/BizTalk/2003/file-properties");
+            
         }
 
         #region IComponent Members
@@ -77,23 +78,45 @@ namespace BizTalkComponents.PipelineComponents
                  {
                      transport = CheckDateTime(transport, match);
                  }
+                 //AdapterReceiveCompleteTime
+                 else if (match.Value.StartsWith("%ReceivedDateTime("))
+                 {
+                     //Trackig must be enabled
+                     val = pInMsg.Context.Read("AdapterReceiveCompleteTime", ns_Tracking);
+                     if (val == null)
+                     {
+                         transport = transport.Replace(match.Value, "");
+                         continue;
+                     }
+                         
+
+                     //DateTime dt = DateTime.ParseExact((string)val, "yyyy-MM-dd hh:mm:ss", ci);
+
+                     transport = CheckContextDateTime(transport, match, (DateTime)val, "ReceivedDateTime");
+                 }
                  else if (match.Value.StartsWith("%FileDateTime("))
                  {
                      val = pInMsg.Context.Read("FileCreationTime", ns_FILE);
 
                      if (val == null)
+                     {
+                         transport = transport.Replace(match.Value, "");
                          continue;
+                     }
 
                      //DateTime dt = DateTime.ParseExact((string)val, "yyyy-MM-dd hh:mm:ss", ci);
-
-                     transport = CheckFileDateTime(transport, match,(DateTime)val);
+                     transport = CheckContextDateTime(transport, match, (DateTime)val, "FileDateTime");
+                     //transport = CheckFileDateTime(transport, match,(DateTime)val);
                  }
                  else if (match.Value == "%FileNameOnly%")
                  {
                      val = pInMsg.Context.Read("ReceivedFileName", ns_FILE);
 
                      if (val == null || String.IsNullOrWhiteSpace((string)val))
+                     {
+                         transport = transport.Replace(match.Value, "");
                          continue;
+                     }
 
                      string receivedFileName = Path.GetFileNameWithoutExtension((string)val);
                      
@@ -133,7 +156,7 @@ namespace BizTalkComponents.PipelineComponents
 
         #region Private methods
 
-        object InitCustomMacros(IBaseMessage msg,string ctxName)
+        object CustomMacro(IBaseMessage msg,string ctxName)
         {
             object val = null;
 
@@ -142,10 +165,11 @@ namespace BizTalkComponents.PipelineComponents
                     string name = String.Empty;
                     string ns = String.Empty;
 
-                    val = msg.Context.ReadAt(i, out name, out ns);
+                    object context_val = msg.Context.ReadAt(i, out name, out ns);
 
                     if (ns.StartsWith("http://schemas.microsoft.com/BizTalk/") == false && ctxName == name)
                     {
+                        val = context_val;
                         break;
                     }
                        
@@ -185,7 +209,7 @@ namespace BizTalkComponents.PipelineComponents
 
             if(context[0] == "CST")
             {
-                val = InitCustomMacros(msg, context[1]);
+                val = CustomMacro(msg, context[1]);
             }
             else 
             { 
@@ -241,13 +265,12 @@ namespace BizTalkComponents.PipelineComponents
                 
         }
 
-
-        string CheckFileDateTime(string input, Match match,DateTime fileDateTime)
+        string CheckContextDateTime(string input, Match match, DateTime fileDateTime,string macro)
         {
 
             //include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
             //bellow creates two regex groups, one of them contains the values in the middle (.*)
-            Match innerMatch = Regex.Match(match.Value, @"%FileDateTime\((.*)\)%");
+            Match innerMatch = Regex.Match(match.Value, String.Format(@"%{0}\((.*)\)%",macro));
             string innerValue = String.Empty;
 
 
@@ -269,12 +292,14 @@ namespace BizTalkComponents.PipelineComponents
             catch (System.FormatException)
             {
 
-                throw new Exception("Invalid dateformat " + innerMatch.Value);
+                throw new Exception(String.Format("Invalid dateformat {0} for macro {1}" + innerMatch.Value,macro));
             }
 
             return input;
 
         }
+
+      
         #endregion
 
         /// <summary>
