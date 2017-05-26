@@ -35,7 +35,7 @@ namespace BizTalkComponents.PipelineComponents
         readonly string ns_Tracking = "http://schemas.microsoft.com/BizTalk/2003/messagetracking-properties";
         readonly string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
         readonly string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
-        readonly string macros = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\(\D*\.\D*\)%";
+        readonly string macros = @"%FilePattern\(.*\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\(\D*\.\D*\)%";
 
 
         public CustomMacros()
@@ -122,6 +122,20 @@ namespace BizTalkComponents.PipelineComponents
                      
                      transport = transport.Replace("%FileNameOnly%", receivedFileName);
                  }
+                 else if (match.Value.StartsWith("%FilePattern("))
+                 {
+                     val = pInMsg.Context.Read("ReceivedFileName", ns_FILE);
+
+                     if (val == null || String.IsNullOrWhiteSpace((string)val))
+                     {
+                         transport = transport.Replace(match.Value, "");
+                         continue;
+                     }
+
+                     string receivedFileName = Path.GetFileNameWithoutExtension((string)val);
+
+                     transport = GetFileParts(transport,receivedFileName, match);
+                 }
                  else if (match.Value.StartsWith("%Context("))
                  {
                      transport = GetContext(transport, match, pInMsg);
@@ -178,6 +192,41 @@ namespace BizTalkComponents.PipelineComponents
 
                 return val; 
             
+        }
+
+        static string GetFileParts(string input, string fileName, Match match)
+        {
+
+            Match innerMatch = Regex.Match(match.Value, @"%FilePattern\((.*)\)%");
+            string innerValue = String.Empty;
+
+
+            //Get RegEx pattern
+            foreach (Group item in innerMatch.Groups)
+            {
+                if (item.ToString()  != match.Value)
+                {
+                    innerValue = item.Value.Trim();
+                    break;
+                }
+
+            }
+
+            innerMatch = Regex.Match(fileName, innerValue);
+            
+            innerValue = String.Empty;
+            //Get part(s)
+            foreach (Group item in innerMatch.Groups)
+            {
+                if (innerMatch.ToString() != item.Value)
+                {
+                    innerValue = innerValue + item.Value.Trim();
+                }
+
+            }
+
+            return input.Replace(match.Value, innerValue);
+
         }
 
         string GetContext(string input, Match match, IBaseMessage msg)
