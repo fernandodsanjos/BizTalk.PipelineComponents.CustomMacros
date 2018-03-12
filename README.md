@@ -24,4 +24,5 @@ One of the goals was to not use pipeline properties, just plug-and-play.<br/>
                            and filename will be c:\integrations\int0010\2017\05\04\message.xml<br/>
 			   
 **%ReceivedDateTime(##)%**<br/> Works like the %DateTime% macro but it uses the AdapterReceiveCompleteTime instead. 
-				To use this macro tracking must be enabled.
+				To use this macro tracking must be enabled.<br/> 
+**%Root%**<br/> Returns the root node of a message<br/> 

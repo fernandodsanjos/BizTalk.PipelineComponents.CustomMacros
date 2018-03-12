@@ -159,6 +159,18 @@ namespace BizTalkComponents.PipelineComponents
                 
             }
 
+            //2018-03-12 Added %Root% Message root node
+            if (transport.Contains("%Root%"))
+            {
+                BTS.MessageType msg = new BTS.MessageType();
+
+                string msgType = (string)pInMsg.Context.Read(msg.Name.Name, msg.Name.Namespace);
+
+   
+
+                transport = transport.Replace("%Root%", msgType.Substring(msgType.IndexOf('#') + 1));
+            }
+
             pInMsg.Context.Promote("OutboundTransportLocation", ns_BTS, (object)transport);
 
             return pInMsg;
