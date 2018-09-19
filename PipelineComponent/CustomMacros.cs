@@ -35,7 +35,7 @@ namespace BizTalkComponents.PipelineComponents
         readonly string ns_Tracking = "http://schemas.microsoft.com/BizTalk/2003/messagetracking-properties";
         readonly string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
         readonly string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
-        readonly string macros = @"%FilePattern\(.*\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\(\D*\.\D*\)%";
+        readonly string macros = @"%FilePattern\([^)]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%";
 
 
         public CustomMacros()
@@ -193,6 +193,8 @@ namespace BizTalkComponents.PipelineComponents
 
                     object context_val = msg.Context.ReadAt(i, out name, out ns);
 
+                    System.Diagnostics.Trace.WriteLine(String.Format("Context name {0}, ns {1} value {2}", name, ns, context_val));
+
                     if (ns.StartsWith("http://schemas.microsoft.com/BizTalk/") == false && ctxName == name)
                     {
                         val = context_val;
@@ -230,9 +232,11 @@ namespace BizTalkComponents.PipelineComponents
             //Get part(s)
             foreach (Group item in innerMatch.Groups)
             {
-                if (innerMatch.ToString() != item.Value)
+
+                if (item.Value.StartsWith("%") == false)
                 {
                     innerValue = innerValue + item.Value.Trim();
+                    break;
                 }
 
             }
@@ -259,24 +263,32 @@ namespace BizTalkComponents.PipelineComponents
 
             }
 
-            string[] context = innerValue.Split('.');
+            //Add possibility to use distinguished fields
 
-            string ns = String.Empty;
-            propertys.TryGetValue(context[0], out ns);
-             
-
-            if (String.IsNullOrWhiteSpace(ns) && context[0] != "CST")
-                return input.Replace(match.Value, "");
-
-            if(context[0] == "CST")
+            if (innerValue.StartsWith("~"))
             {
-                val = CustomMacro(msg, context[1]);
+                val = SearchDistinguishedFields(innerValue, msg);
             }
-            else 
-            { 
-                val = msg.Context.Read(context[1], ns); 
+            else
+            {
+                string[] context = innerValue.Split('.');
+
+                string ns = String.Empty;
+                propertys.TryGetValue(context[0], out ns);
+
+
+                if (String.IsNullOrWhiteSpace(ns) && context[0] != "CST")
+                    return input.Replace(match.Value, "");
+
+                if (context[0] == "CST")
+                {
+                    val = CustomMacro(msg, context[1]);
+                }
+                else
+                {
+                    val = msg.Context.Read(context[1], ns);
+                }
             }
-            
 
             if (val == null || String.IsNullOrWhiteSpace((string)val))
             { 
@@ -324,6 +336,45 @@ namespace BizTalkComponents.PipelineComponents
 
                 return input;
                 
+        }
+
+        string SearchDistinguishedFields(string input, IBaseMessage msg)
+        {
+            object val = null;
+
+            for (int i = 0; i < msg.Context.CountProperties; i++)
+            {
+                string name = String.Empty;
+                string ns = String.Empty;
+
+                object context_val = msg.Context.ReadAt(i, out name, out ns);
+                
+                if (ns.EndsWith("btsDistinguishedFields") == true && DistinguishedString(name).EndsWith(input))
+                {
+                    val = context_val;
+                    break;
+                }
+                
+            }
+
+            return (string)val;
+        }
+        string DistinguishedString(string contextname)
+        {
+            StringBuilder builder = new StringBuilder();
+            string[] localnames = contextname.Split(new string[] { "[local-name()='" }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string localname in localnames)
+            {
+                if (localname.StartsWith("/*"))
+                    continue;
+
+                builder.AppendFormat("~{0}", localname.Substring(0, localname.IndexOf('\'')));
+                
+               
+            }
+
+            return builder.ToString();
         }
 
         string CheckContextDateTime(string input, Match match, DateTime fileDateTime,string macro)

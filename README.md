@@ -15,8 +15,15 @@ One of the goals was to not use pipeline properties, just plug-and-play.<br/>
 
 **%Context(#)%**<br/>     Use any value from standard context values<br/>
                   Example _%Context(BTS.InterchangeID)%_ returns the InterchageID of the message.<br/>
-				  Custom context can also be applied by using the prefix CST. A search will be done through all none MS context until
-				  a match is made. The only thing one must make sure is that there must not exist two (2) custom context properties with the same name.<br/>
+				  Custom context can also be applied by using the prefix CST. A search will be done through all none MS context properties until a match is made.<br/>
+                *Distinguished fields*
+                  It is possible to use distinguished fields by adding a filename friendly xpath variant. This is a better alternative then using unnecessary promoted properties.<br/>
+                  Example: 
+                  If the distinguished xpath looks like bellow
+/*[local-name()='Ledger' and namespace-uri()='http://ICC.Company.Schemas']/*[local-name()='AccountingDate' and namespace-uri()='']
+Filename friendly xpath would be _\~Ledger~AccountingDate_
+Final macro would then be _%Context(\~Ledger~AccountingDate)%_
+
 				  
 **%Folder%**<br/>          Adds a backslash \. This makes it possible to choose any folder bellow the root folder specified by URI.<br/>
                   Example: _%DateTime(yyyy)%%Folder%%DateTime(MM)%%Folder%%DateTime(dd)%%Folder%message.xml_
