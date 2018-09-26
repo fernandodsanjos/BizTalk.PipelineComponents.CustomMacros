@@ -29,7 +29,13 @@ Final macro would then be _%Context(\~Ledger~AccountingDate)%_
                   Example: _%DateTime(yyyy)%%Folder%%DateTime(MM)%%Folder%%DateTime(dd)%%Folder%message.xml_
                            If the URI is c:\integrations\int0010\ and the current date is 2017-05-04 the final folder
                            and filename will be c:\integrations\int0010\2017\05\04\message.xml<br/>
+Folder structure will be created if it does not exist.
 			   
 **%ReceivedDateTime(##)%**<br/> Works like the %DateTime% macro but it uses the AdapterReceiveCompleteTime instead. 
 				To use this macro tracking must be enabled.<br/> 
 **%Root%**<br/> Returns the root node of a message<br/> 
+**%DateTimeFormat([context],[dateformat])%**<br/>
+Example: <br/>%DateTimeFormat(FILE.FileCreated,yyyy)%<br/>%DateTimeFormat(\~Invoice\~InvoiceDate,yyyy)% <br/>
+ Works like the %DateTime% macro but it works on any context property , promoted or not or  distinguished, that contains any value that could be interpreted as a date/time format<br/>
+ Date format yyyyMMdd is also allowed<br/>
+

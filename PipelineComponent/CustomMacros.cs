@@ -35,7 +35,7 @@ namespace BizTalkComponents.PipelineComponents
         readonly string ns_Tracking = "http://schemas.microsoft.com/BizTalk/2003/messagetracking-properties";
         readonly string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
         readonly string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
-        readonly string macros = @"%FilePattern\([^)]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%";
+        readonly string macros = @"%FilePattern\([^)]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%|%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
 
 
         public CustomMacros()
@@ -140,10 +140,15 @@ namespace BizTalkComponents.PipelineComponents
                  {
                      transport = GetContext(transport, match, pInMsg);
                  }
-
+                else if (match.Value.StartsWith("%DateTimeFormat("))
+                {
+                    transport = DateTimeFormat(pInMsg, transport, match);
+                }
+                    
             }
                    
             
+
             if (transport.Contains("%Folder%"))
             {
                 transport = transport.Replace("%Folder%", @"\");
@@ -181,6 +186,48 @@ namespace BizTalkComponents.PipelineComponents
         #endregion
 
         #region Private methods
+
+        private string DateTimeFormat(IBaseMessage msg, string input, Match match)
+        {
+            string retpart = String.Empty;
+            object context = null;
+
+            string[] parts = match.Value.Split(',');
+
+            parts[0] = parts[0].Replace("%DateTimeFormat(", "").Trim();//context part
+            string format = parts[1] = parts[1].Replace(")%", "").Trim();//datetime format
+
+            context = GetContextValue(parts[0], msg);
+
+            try
+            {
+                if (context is DateTime)
+                {
+                    retpart = ((DateTime)context).ToString(format);
+                }
+                else if (Regex.Match((string)context, @"^\d{8}$").Success)
+
+                {
+                    retpart = DateTime.ParseExact((string)context, "yyyyMMdd", null).ToString(format);
+                }
+                else
+                    retpart = DateTime.Parse((string)context).ToString(format);
+            }
+            catch (FormatException)
+            {
+
+               //do nothing
+            }
+            finally
+            {
+
+                 input = input.Replace(match.Value, retpart);
+               
+            }
+
+            return input;
+
+        }
 
         object CustomMacro(IBaseMessage msg,string ctxName)
         {
@@ -244,7 +291,39 @@ namespace BizTalkComponents.PipelineComponents
             return input.Replace(match.Value, innerValue);
 
         }
+       
+        //Moved retrival of context value in it's own method
+        object GetContextValue(string context, IBaseMessage msg)
+        {
+            object val = null;
+            if (context.StartsWith("~"))
+            {
+                val = SearchDistinguishedFields(context, msg);
+            }
+            else
+            {
+                string[] ctx = context.Split('.');
 
+                string ns = String.Empty;
+                propertys.TryGetValue(ctx[0], out ns);
+
+
+                if (String.IsNullOrWhiteSpace(ns) && ctx[0] != "CST")
+                    return val;
+
+                if (ctx[0] == "CST")
+                {
+                    val = CustomMacro(msg, ctx[1]);
+                }
+                else
+                {
+                    val = msg.Context.Read(ctx[1], ns);
+                }
+            }
+
+            return val;
+
+        }
         string GetContext(string input, Match match, IBaseMessage msg)
         {
             //format %Context(BTS.InterchangeID)%
@@ -263,32 +342,8 @@ namespace BizTalkComponents.PipelineComponents
 
             }
 
-            //Add possibility to use distinguished fields
-
-            if (innerValue.StartsWith("~"))
-            {
-                val = SearchDistinguishedFields(innerValue, msg);
-            }
-            else
-            {
-                string[] context = innerValue.Split('.');
-
-                string ns = String.Empty;
-                propertys.TryGetValue(context[0], out ns);
-
-
-                if (String.IsNullOrWhiteSpace(ns) && context[0] != "CST")
-                    return input.Replace(match.Value, "");
-
-                if (context[0] == "CST")
-                {
-                    val = CustomMacro(msg, context[1]);
-                }
-                else
-                {
-                    val = msg.Context.Read(context[1], ns);
-                }
-            }
+            //Added possibility to use distinguished fields
+            val = GetContextValue(innerValue, msg);
 
             if (val == null || String.IsNullOrWhiteSpace((string)val))
             { 
@@ -361,17 +416,15 @@ namespace BizTalkComponents.PipelineComponents
         }
         string DistinguishedString(string contextname)
         {
-            StringBuilder builder = new StringBuilder();
-            string[] localnames = contextname.Split(new string[] { "[local-name()='" }, StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (string localname in localnames)
+            MatchCollection col = Regex.Matches(contextname, "'([a-zA-Z]+)'");
+            StringBuilder builder = new StringBuilder(col.Count);
+
+            foreach (Match item in col)
             {
-                if (localname.StartsWith("/*"))
-                    continue;
+                //First group contains single qoutes, second group value inside single qoutes ( )
+                builder.AppendFormat("~{0}", item.Groups[1].Value);
 
-                builder.AppendFormat("~{0}", localname.Substring(0, localname.IndexOf('\'')));
-                
-               
             }
 
             return builder.ToString();

@@ -3,3 +3,12 @@ C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\bin\
 C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.csprojResolveAssemblyReference.cache
 C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.dll
 C:\work\BizTalkComponents.PipelineComponents\CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.pdb
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\bin\Debug\BizTalkComponents.PipelineComponents.CustomMacros.dll
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\bin\Debug\BizTalkComponents.PipelineComponents.CustomMacros.pdb
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\bin\Debug\Microsoft.BizTalk.Pipeline.dll
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\bin\Debug\Microsoft.XLANGs.BaseTypes.dll
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\bin\Debug\Microsoft.XLANGs.BizTalk.Engine.dll
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\bin\Debug\Microsoft.XLANGs.Engine.dll
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.csprojResolveAssemblyReference.cache
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.dll
+D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\obj\Debug\BizTalkComponents.PipelineComponents.CustomMacros.pdb
