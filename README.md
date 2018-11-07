@@ -40,6 +40,6 @@ Example: <br/>%DateTimeFormat(FILE.FileCreated,yyyy)%<br/>%DateTimeFormat(\~Invo
  Works like the %DateTime% macro but it works on any context property , promoted or not or  distinguished, that contains any value that could be interpreted as a date/time format<br/>
  Date format yyyyMMdd is also allowed<br/>
 
-**FilePattern([regex])** Runs a regex expression on sourcefilename.<br/>
+**%FilePattern([regex])%** Runs a regex expression on sourcefilename.<br/>
 Example: If incomming filename is  P123789.txt and sendport filename is Q%FilePattern([0-9]+)%.txt, Then outgoing filename would result in Q123789.txt 
 
