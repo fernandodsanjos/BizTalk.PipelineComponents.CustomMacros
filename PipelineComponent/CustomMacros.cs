@@ -317,7 +317,10 @@ namespace BizTalkComponents.PipelineComponents
                 }
                 else
                 {
-                    val = msg.Context.Read(ctx[1], ns);
+
+                     val = msg.Context.Read(ctx[1], ns);
+                    
+                    
                 }
             }
 
@@ -344,6 +347,10 @@ namespace BizTalkComponents.PipelineComponents
 
             //Added possibility to use distinguished fields
             val = GetContextValue(innerValue, msg);
+
+            //2019-02-13 FIX for invalid conversion
+            if (!(val is string))
+                val = val.ToString();
 
             if (val == null || String.IsNullOrWhiteSpace((string)val))
             { 
