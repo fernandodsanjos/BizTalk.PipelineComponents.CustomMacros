@@ -349,7 +349,8 @@ namespace BizTalkComponents.PipelineComponents
             val = GetContextValue(innerValue, msg);
 
             //2019-02-13 FIX for invalid conversion
-            if (!(val is string))
+            //2019-02-25 BUG FIX for null value
+            if (val != null && !(val is string))
                 val = val.ToString();
 
             if (val == null || String.IsNullOrWhiteSpace((string)val))
