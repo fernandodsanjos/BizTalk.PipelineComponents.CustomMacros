@@ -1,0 +1,1 @@
+nuget pack %1 > text.txt

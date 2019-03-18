@@ -35,7 +35,8 @@ namespace BizTalkComponents.PipelineComponents
         readonly string ns_Tracking = "http://schemas.microsoft.com/BizTalk/2003/messagetracking-properties";
         readonly string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
         readonly string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
-        readonly string macros = @"%FilePattern\([^)]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%|%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
+        //2019-03-14 Updated FilePattern so that it can handle captures (...)
+        readonly string macros = @"%FilePattern\([^%]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%|%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
 
 
         public CustomMacros()
@@ -62,7 +63,7 @@ namespace BizTalkComponents.PipelineComponents
         {
             CultureInfo ci = CultureInfo.InvariantCulture;
             object val = null;
-
+            
             //%Folder% = Adds a backslash
             //Does the filemask have any custom macros
             string transport = (string)pInMsg.Context.Read("OutboundTransportLocation", ns_BTS);
@@ -178,6 +179,9 @@ namespace BizTalkComponents.PipelineComponents
 
             pInMsg.Context.Promote("OutboundTransportLocation", ns_BTS, (object)transport);
 
+          
+          //  pInMsg.BodyPart.Data = stm;
+
             return pInMsg;
         }
 
@@ -265,7 +269,7 @@ namespace BizTalkComponents.PipelineComponents
             //Get RegEx pattern
             foreach (Group item in innerMatch.Groups)
             {
-                if (item.ToString()  != match.Value)
+                if (item.ToString() != match.Value)
                 {
                     innerValue = item.Value.Trim();
                     break;
@@ -273,25 +277,28 @@ namespace BizTalkComponents.PipelineComponents
 
             }
 
+            //Get first match
             innerMatch = Regex.Match(fileName, innerValue);
-            
+
             innerValue = String.Empty;
-            //Get part(s)
-            foreach (Group item in innerMatch.Groups)
+
+            //If count > 0 then capturing group has been used
+            if (innerMatch.Groups.Count == 1)
             {
-
-                if (item.Value.StartsWith("%") == false)
-                {
-                    innerValue = innerValue + item.Value.Trim();
-                    break;
-                }
-
+                innerValue = innerMatch.Groups[0].Value.Trim();
             }
+            else if (innerMatch.Groups.Count > 1)
+            {
+                //A capture is used, pick the first one
+                innerValue = innerMatch.Groups[1].Value.Trim();
+            }
+
+
 
             return input.Replace(match.Value, innerValue);
 
         }
-       
+
         //Moved retrival of context value in it's own method
         object GetContextValue(string context, IBaseMessage msg)
         {
