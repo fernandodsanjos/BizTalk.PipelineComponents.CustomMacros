@@ -14,7 +14,6 @@ using Microsoft.BizTalk.Message.Interop;
 using Microsoft.BizTalk.Component.Interop;
 using Microsoft.BizTalk.ScalableTransformation;
 using Microsoft.XLANGs.RuntimeTypes;
-using BizTalkComponents.Utils;
 
 namespace BizTalkComponents.PipelineComponents
 {
@@ -56,7 +55,7 @@ namespace BizTalkComponents.PipelineComponents
 
         public IEnumerator Validate(object projectSystem)
         {
-            return ValidationHelper.Validate(this, false).GetEnumerator();
+            return null;
         }
 
         #endregion

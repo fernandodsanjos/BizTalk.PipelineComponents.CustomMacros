@@ -17,7 +17,6 @@ using Microsoft.BizTalk.Component.Interop;
 using Microsoft.BizTalk.ScalableTransformation;
 using Microsoft.XLANGs.RuntimeTypes;
 using System.ComponentModel.DataAnnotations;
-using BizTalkComponents.Utils;
 using System.Globalization;
 
 namespace BizTalkComponents.PipelineComponents
