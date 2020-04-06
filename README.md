@@ -7,8 +7,37 @@ One of the goals was to not use pipeline properties, just plug-and-play.<br/>
 
 **%FileNameOnly%**<br/>    Like %SourceFileName% but without the file extension.<br/>
 
+**%AddDays(#,#)%<br/> Lets you add or subtract day(s) for DateTime.Now. Works like DateTime.Now.AddDays(#).ToString(#)<br/>
+                  Examples: _%AddDays(1,dd)%_, add one day to current datetime<br/>
+                           _%AddDays(-2,dd)%_, substract two days to current datetime<br/>
+
+**%AddMonths(#,#)%<br/> Lets you add or subtract month(s) for DateTime.Now. Works like DateTime.Now.AddMonths(#).ToString(#)<br/>
+                  Examples: _%AddMonths(1,mm)%_, add one month to current datetime<br/>
+                           _%AddMonths(-2,mm)%_, substract two months to current datetime<br/>
+			   
+**%AddYears(#,#)%<br/> Lets you add or subtract day(s) for DateTime.Now. Works like DateTime.Now.AddYears(#).ToString(#)<br/>
+                  Examples: _%AddYears(1,yyyy)%_, add one year to current datetime<br/>
+                           _%AddYears(-2,yyyy)%_, substract two years to current datetime<br/>
+			   
+**%UTCAddDays(#,#)%<br/> Lets you add or subtract day(s) for DateTime.UtcNow. Works like DateTime.UtcNow.AddDays(#).ToString(#)<br/>
+                  Examples: _%UTCAddDays(1,dd)%_, add one day to current utc datetime<br/>
+                           _%UTCAddDays(-2,dd)%_, substract one day to current utc datetime<br/>
+
+**%UTCAddMonths(#,#)%<br/> Lets you add or subtract month(s) for DateTime.UtcNow. Works like DateTime.UtcNow.AddMonths(#).ToString(#)<br/>
+                  Examples: _%UTCAddMonths(1,mm)%_, add one month to current utc datetime<br/>
+                           _%UTCAddMonths(-2,mm)%_, substract two months to current utc datetime<br/>
+			   
+**%UTCAddYears(#,#)%<br/> Lets you add or subtract day(s) for DateTime.UtcNow. Works like DateTime.UtcNow.AddYears(#).ToString(#)<br/>
+                  Examples: _%UTCAddYears(1,yyyy)%_, add one year to current datetime<br/>
+                           _%UTCAddYears(-2,yyyy)%_, substract two years to current utc datetime<br/>
+
+**%UTCDateTime(#)%**<br/>    Lets you format the current date time as you want it. Works more or less like DateTime.UtcNow.ToString()<br/>
+                  Examples: _%UTCDateTime(d)%_, current day number<br/>
+                            _%UTCDateTime(yyyy)%_, current year<br/>
+                            _%UTCDateTime(MM)%_, current month<br/>
+			    
 **%DateTime(#)%**<br/>    Lets you format the current date time as you want it. Works more or less like DateTime.Now.ToString(#)<br/>
-                  Examples: _%DateTime(%d)%_, current day number<br/>
+                  Examples: _%DateTime(d)%_, current day number<br/>
                             _%DateTime(yyyy)%_, current year<br/>
                             _%DateTime(MM)%_, current month<br/>
 			    
