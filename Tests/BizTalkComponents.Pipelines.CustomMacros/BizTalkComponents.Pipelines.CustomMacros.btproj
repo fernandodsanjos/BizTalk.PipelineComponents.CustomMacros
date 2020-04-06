@@ -59,7 +59,7 @@
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BizTalkComponents.PipelineComponents.CustomMacros, Version=1.0.0.0, Culture=neutral, PublicKeyToken=47190f56632fbc76, processorArchitecture=MSIL" />
+    <Reference Include="BizTalkComponents.PipelineComponents.CustomMacros, Version=1.0.1.0, Culture=neutral, PublicKeyToken=47190f56632fbc76, processorArchitecture=MSIL" />
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -97,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Key.snk" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6">

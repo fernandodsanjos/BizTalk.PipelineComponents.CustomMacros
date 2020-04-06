@@ -18,6 +18,7 @@ using Microsoft.BizTalk.ScalableTransformation;
 using Microsoft.XLANGs.RuntimeTypes;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Linq;
 
 namespace BizTalkComponents.PipelineComponents
 {
@@ -31,13 +32,43 @@ namespace BizTalkComponents.PipelineComponents
     {
         Dictionary<string,string> propertys = new Dictionary<string,string>();
 
+        enum DateTimeTypes
+        {
+            Day = 0,
+            Month = 1,
+            Year = 2
+        }
+
         readonly string ns_Tracking = "http://schemas.microsoft.com/BizTalk/2003/messagetracking-properties";
         readonly string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
         readonly string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
         //2019-03-14 Updated FilePattern so that it can handle captures (...)
-        readonly string macros = @"%FilePattern\([^%]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%|%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
+        readonly string macros = Macros();
 
+        //readonly string macros = @"%FilePattern\([^%]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%|%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
+       
+        static private string Macros()
+        {
+            //2020-04-06 Added array to easier add new macros and see what macros already exists
+            string[] _macros = new string[14];
+            _macros[0] = @"%FilePattern\([^%]+\)%";
+            _macros[1] = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[2] = @"%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[3] = @"%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[4] = @"%FileNameOnly%|%Context\([^)]*\)%";
+            _macros[5] = @"%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
+            _macros[6] = @"%Context\([^)]*\)%";
+            _macros[7] = @"%UTCDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[8] = @"%AddDays\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[9] = @"%AddMonths\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[10] = @"%AddYears\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[11] = @"%UTCAddDays\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[12] = @"%UTCAddMonths\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[13] = @"%UTCAddYears\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
 
+            return String.Join("|", _macros);
+
+        }
         public CustomMacros()
         {
             propertys = new Dictionary<string,string>();
@@ -74,7 +105,35 @@ namespace BizTalkComponents.PipelineComponents
            
             foreach (Match match in collection)
             {
-                 if (match.Value.StartsWith("%DateTime("))
+                if (match.Value.StartsWith("%AddDays("))
+                {
+                    transport = DateTimeAdd(transport, match.Value, DateTimeTypes.Day);
+                }
+                else if (match.Value.StartsWith("%AddMonths("))
+                {
+                    transport = DateTimeAdd(transport, match.Value, DateTimeTypes.Month);
+                }
+                else if (match.Value.StartsWith("%AddYears("))
+                {
+                    transport = DateTimeAdd(transport, match.Value, DateTimeTypes.Year);
+                }
+                else if (match.Value.StartsWith("%UTCAddDays("))
+                {
+                    transport = UtcDateTimeAdd(transport, match.Value, DateTimeTypes.Day);
+                }
+                else if (match.Value.StartsWith("%UTCAddMonths("))
+                {
+                    transport = UtcDateTimeAdd(transport, match.Value, DateTimeTypes.Month);
+                }
+                else if (match.Value.StartsWith("%UTCAddYears("))
+                {
+                    transport = UtcDateTimeAdd(transport, match.Value, DateTimeTypes.Year);
+                }
+                else if (match.Value.StartsWith("%UTCDateTime("))
+                {
+                    transport = CheckDateTime(transport, match, true);
+                }
+                else if (match.Value.StartsWith("%DateTime("))
                  {
                      transport = CheckDateTime(transport, match);
                  }
@@ -178,9 +237,6 @@ namespace BizTalkComponents.PipelineComponents
 
             pInMsg.Context.Promote("OutboundTransportLocation", ns_BTS, (object)transport);
 
-          
-          //  pInMsg.BodyPart.Data = stm;
-
             return pInMsg;
         }
 
@@ -242,8 +298,6 @@ namespace BizTalkComponents.PipelineComponents
                     string ns = String.Empty;
 
                     object context_val = msg.Context.ReadAt(i, out name, out ns);
-
-                    System.Diagnostics.Trace.WriteLine(String.Format("Context name {0}, ns {1} value {2}", name, ns, context_val));
 
                     if (ns.StartsWith("http://schemas.microsoft.com/BizTalk/") == false && ctxName == name)
                     {
@@ -373,12 +427,17 @@ namespace BizTalkComponents.PipelineComponents
             return input;
         }
 
-        string CheckDateTime(string input,Match match)
+        string CheckDateTime(string input, Match match)
+        {
+            return CheckDateTime(input, match, false);
+        }
+
+        string CheckDateTime(string input,Match match, bool utc)
         {
             
             //include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
             //bellow creates two regex groups, one of them contains the values in the middle (.*)
-                Match innerMatch = Regex.Match(match.Value, @"%DateTime\((.*)\)%");
+                Match innerMatch = Regex.Match(match.Value, @"%[UTC]*DateTime\((.*)\)%");
                 string innerValue = String.Empty;
 
                  
@@ -394,7 +453,17 @@ namespace BizTalkComponents.PipelineComponents
 
                 try
                 {
-                    string dateformat = DateTime.Now.ToString(innerValue);
+                    string dateformat = String.Empty;
+
+                    if(utc)
+                    {
+                        dateformat = DateTime.UtcNow.ToString(innerValue);
+                    }
+                    else
+                    {
+                        dateformat = DateTime.Now.ToString(innerValue);
+                    }
+                    
                     input = input.Replace(match.Value, dateformat);
                 }
                 catch (System.FormatException)
@@ -407,6 +476,124 @@ namespace BizTalkComponents.PipelineComponents
                 
         }
 
+        private string UtcDateTimeAdd(string input, string pattern, DateTimeTypes dtType)
+        {
+            //Include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
+            //Bellow creates two regex groups, one of them contains the values in the middle (.*)
+            Match innerMatch = Regex.Match(pattern, @"%UTCAdd[MonthsDayYer]+\(([-]?\d+,.*)\)%");
+            char[] delimiterChar = { ',' };
+
+            string innerValue = String.Empty;
+
+
+            foreach (Group item in innerMatch.Groups)
+            {
+
+                if (item.Value.StartsWith("%UTCAdd") == false && item.Success == true)  //Success == false = empty values
+                {
+                    innerValue = item.Value;
+
+                    string[] values = innerValue.Split(delimiterChar, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (values.Count() != 2)
+                        return input.Replace(innerMatch.Value, String.Empty);
+
+                    try
+                    {
+                        string dateformat = String.Empty;
+
+                        switch (dtType)
+                        {
+                            case DateTimeTypes.Day:
+                                long days = long.Parse(values[0]);
+                                dateformat = DateTime.UtcNow.AddDays(days).ToString(values[1]);
+                                break;
+                            case DateTimeTypes.Month:
+                                int months = int.Parse(values[0]);
+                                dateformat = DateTime.UtcNow.AddMonths(months).ToString(values[1]);
+                                break;
+                            case DateTimeTypes.Year:
+                                int years = int.Parse(values[0]);
+                                dateformat = DateTime.UtcNow.AddYears(years).ToString(values[1]);
+                                break;
+                        }
+
+                        input = input.Replace(innerMatch.Value, dateformat);
+
+                    }
+                    catch (System.FormatException)
+                    {
+
+                        throw new Exception("Invalid dateformat " + innerMatch.Value);
+                    }
+                }
+
+            }
+
+
+
+            return input;
+
+        }
+        private string DateTimeAdd(string input, string pattern, DateTimeTypes dtType)
+        {
+            //Include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
+            //Bellow creates two regex groups, one of them contains the values in the middle (.*)
+            Match innerMatch = Regex.Match(pattern, @"%Add[MonthsDayYer]+\(([-]?\d+,.*)\)%");
+            char[] delimiterChar = { ',' };
+
+            string innerValue = String.Empty;
+
+
+            foreach (Group item in innerMatch.Groups)
+            {
+
+                if (item.Value.StartsWith("%Add") == false && item.Success == true)  //Success == false = empty values
+                {
+                    innerValue = item.Value;
+
+                    string[] values = innerValue.Split(delimiterChar, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (values.Count() != 2)
+                        return input.Replace(innerMatch.Value, String.Empty);
+
+                    try
+                    {
+                        string dateformat = String.Empty;
+
+                        switch (dtType)
+                        {
+                            case DateTimeTypes.Day:
+                                long days = long.Parse(values[0]);
+                                dateformat = DateTime.Now.AddDays(days).ToString(values[1]);
+                                break;
+                            case DateTimeTypes.Month:
+                                int months = int.Parse(values[0]);
+                                dateformat = DateTime.Now.AddMonths(months).ToString(values[1]);
+                                break;
+                            case DateTimeTypes.Year:
+                                int years = int.Parse(values[0]);
+                                dateformat = DateTime.Now.AddYears(years).ToString(values[1]);
+                                break;
+                        }
+
+                        input = input.Replace(innerMatch.Value, dateformat);
+
+                    }
+                    catch (System.FormatException)
+                    {
+
+                        throw new Exception("Invalid dateformat " + innerMatch.Value);
+                    }
+                }
+
+            }
+
+
+
+            return input;
+
+        }
         string SearchDistinguishedFields(string input, IBaseMessage msg)
         {
             object val = null;
