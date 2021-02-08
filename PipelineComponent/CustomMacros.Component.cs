@@ -14,6 +14,7 @@ using Microsoft.BizTalk.Message.Interop;
 using Microsoft.BizTalk.Component.Interop;
 using Microsoft.BizTalk.ScalableTransformation;
 using Microsoft.XLANGs.RuntimeTypes;
+using BizTalkComponents.Utils;
 
 namespace BizTalkComponents.PipelineComponents
 {
@@ -38,7 +39,7 @@ namespace BizTalkComponents.PipelineComponents
 
         public string Version
         {
-            get { return "1.0.0"; }
+            get { return "2.0.0"; }
         }
 
         #endregion
@@ -72,7 +73,48 @@ namespace BizTalkComponents.PipelineComponents
             throw new Exception("The method or operation is not implemented.");
         }
 
-       
+        //Load and Save are generic, the functions create properties based on the components "public" "read/write" properties.
+        public void Load(IPropertyBag propertyBag, int errorLog)
+        {
+            var props = this.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+
+            foreach (var prop in props)
+
+            {
+
+                if (prop.CanRead & prop.CanWrite)
+
+                {
+
+                    prop.SetValue(this, PropertyBagHelper.ReadPropertyBag(propertyBag, prop.Name, prop.GetValue(this)));
+
+                }
+
+            }
+
+
+        }
+
+        public void Save(IPropertyBag propertyBag, bool clearDirty, bool saveAllProperties)
+        {
+            var props = this.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+
+            foreach (var prop in props)
+
+            {
+
+                if (prop.CanRead & prop.CanWrite)
+
+                {
+
+                    PropertyBagHelper.WritePropertyBag(propertyBag, prop.Name, prop.GetValue(this));
+
+                }
+
+            }
+
+        }
+
     }
 
 }

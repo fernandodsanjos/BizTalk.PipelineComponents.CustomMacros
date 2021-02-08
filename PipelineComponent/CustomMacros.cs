@@ -32,6 +32,16 @@ namespace BizTalkComponents.PipelineComponents
     {
         Dictionary<string,string> propertys = new Dictionary<string,string>();
 
+        /// <summary>
+        /// If Context is not found an error is thrown
+        /// </summary>
+        [DisplayName("Context Required")]
+        public bool ContextRequired
+        {
+            get; set;
+        } = false;
+
+
         enum DateTimeTypes
         {
             Day = 0,
@@ -39,9 +49,9 @@ namespace BizTalkComponents.PipelineComponents
             Year = 2
         }
 
-        readonly string ns_Tracking = "http://schemas.microsoft.com/BizTalk/2003/messagetracking-properties";
-        readonly string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
-        readonly string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
+        const string ns_Tracking = "http://schemas.microsoft.com/BizTalk/2003/messagetracking-properties";
+        const string ns_BTS = "http://schemas.microsoft.com/BizTalk/2003/system-properties";
+        const string ns_FILE = "http://schemas.microsoft.com/BizTalk/2003/file-properties";
         //2019-03-14 Updated FilePattern so that it can handle captures (...)
         readonly string macros = Macros();
 
@@ -214,7 +224,10 @@ namespace BizTalkComponents.PipelineComponents
 
                 string transportType = (string)pInMsg.Context.Read("OutboundTransportType", ns_BTS);
 
-                if(transportType == "FILE")
+                if (transport.Contains("\\\\"))
+                    throw new ArgumentException($"Directory path is invalid {transport}");
+
+                if (transportType == "FILE")
                 {
                     string dirname = Path.GetDirectoryName(transport);
                     //Will create the new directory structure if it does not exist, only applies to FOLDER
@@ -240,8 +253,6 @@ namespace BizTalkComponents.PipelineComponents
             return pInMsg;
         }
 
-
-
         #endregion
 
         #region Private methods
@@ -258,6 +269,10 @@ namespace BizTalkComponents.PipelineComponents
 
             context = GetContextValue(parts[0], msg);
 
+            if (context == null && ContextRequired)
+                throw new KeyNotFoundException($"Context {parts[0]} not found!");
+
+
             try
             {
                 if (context is DateTime)
@@ -265,17 +280,17 @@ namespace BizTalkComponents.PipelineComponents
                     retpart = ((DateTime)context).ToString(format);
                 }
                 else if (Regex.Match((string)context, @"^\d{8}$").Success)
-
                 {
                     retpart = DateTime.ParseExact((string)context, "yyyyMMdd", null).ToString(format);
                 }
                 else
                     retpart = DateTime.Parse((string)context).ToString(format);
             }
-            catch (FormatException)
+            catch (FormatException fe)
             {
 
-               //do nothing
+                if (ContextRequired)
+                    throw new FormatException($"Context {parts[0]} could not be evaluated to DateTime!",fe);
             }
             finally
             {
@@ -367,23 +382,17 @@ namespace BizTalkComponents.PipelineComponents
                 string ns = String.Empty;
                 propertys.TryGetValue(ctx[0], out ns);
 
-
-                if (String.IsNullOrWhiteSpace(ns) && ctx[0] != "CST")
-                    return val;
-
                 if (ctx[0] == "CST")
                 {
                     val = CustomMacro(msg, ctx[1]);
                 }
-                else
+                else if(String.IsNullOrWhiteSpace(ns) == false)
                 {
-
                      val = msg.Context.Read(ctx[1], ns);
-                    
-                    
                 }
             }
 
+           
             return val;
 
         }
@@ -391,6 +400,10 @@ namespace BizTalkComponents.PipelineComponents
         {
             //format %Context(BTS.InterchangeID)%
             Match innerMatch = Regex.Match(match.Value, @"%Context\((.*)\)%");
+
+            if (innerMatch.Success == false)
+                throw new ArgumentException($"No match for regex {match.Value}", "GetContext");
+
             string innerValue = String.Empty;
             object val = null;
            
@@ -408,6 +421,10 @@ namespace BizTalkComponents.PipelineComponents
             //Added possibility to use distinguished fields
             val = GetContextValue(innerValue, msg);
 
+            if(val == null && ContextRequired)
+                throw new KeyNotFoundException($"Context {innerValue} not found!");
+            
+               
             //2019-02-13 FIX for invalid conversion
             //2019-02-25 BUG FIX for null value
             if (val != null && !(val is string))
@@ -437,8 +454,12 @@ namespace BizTalkComponents.PipelineComponents
             
             //include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
             //bellow creates two regex groups, one of them contains the values in the middle (.*)
-                Match innerMatch = Regex.Match(match.Value, @"%[UTC]*DateTime\((.*)\)%");
-                string innerValue = String.Empty;
+            Match innerMatch = Regex.Match(match.Value, @"%[UTC]*DateTime\((.*)\)%");
+
+            if (innerMatch.Success == false)
+                throw new ArgumentException($"No match for regex {match.Value}", "CheckDateTime");
+
+            string innerValue = String.Empty;
 
                  
                 foreach (Group item in innerMatch.Groups)
@@ -466,10 +487,10 @@ namespace BizTalkComponents.PipelineComponents
                     
                     input = input.Replace(match.Value, dateformat);
                 }
-                catch (System.FormatException)
+                catch (System.FormatException fe)
                 {
 
-                    throw new Exception("Invalid dateformat " + innerMatch.Value);
+                    throw new Exception("Invalid dateformat " + innerMatch.Value,fe);
                 }
 
                 return input;
@@ -481,6 +502,10 @@ namespace BizTalkComponents.PipelineComponents
             //Include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
             //Bellow creates two regex groups, one of them contains the values in the middle (.*)
             Match innerMatch = Regex.Match(pattern, @"%UTCAdd[MonthsDayYer]+\(([-]?\d+,.*)\)%");
+
+            if (innerMatch.Success == false)
+                throw new ArgumentException($"No match for regex {pattern}", "UtcDateTimeAdd");
+
             char[] delimiterChar = { ',' };
 
             string innerValue = String.Empty;
@@ -521,10 +546,10 @@ namespace BizTalkComponents.PipelineComponents
                         input = input.Replace(innerMatch.Value, dateformat);
 
                     }
-                    catch (System.FormatException)
+                    catch (System.FormatException fe)
                     {
 
-                        throw new Exception("Invalid dateformat " + innerMatch.Value);
+                        throw new Exception("Invalid dateformat " + innerMatch.Value, fe);
                     }
                 }
 
@@ -540,6 +565,10 @@ namespace BizTalkComponents.PipelineComponents
             //Include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
             //Bellow creates two regex groups, one of them contains the values in the middle (.*)
             Match innerMatch = Regex.Match(pattern, @"%Add[MonthsDayYer]+\(([-]?\d+,.*)\)%");
+
+            if (innerMatch.Success == false)
+                throw new ArgumentException($"No match for regex {pattern}", "DateTimeAdd");
+
             char[] delimiterChar = { ',' };
 
             string innerValue = String.Empty;
@@ -580,10 +609,10 @@ namespace BizTalkComponents.PipelineComponents
                         input = input.Replace(innerMatch.Value, dateformat);
 
                     }
-                    catch (System.FormatException)
+                    catch (System.FormatException fe)
                     {
 
-                        throw new Exception("Invalid dateformat " + innerMatch.Value);
+                        throw new Exception("Invalid dateformat " + innerMatch.Value, fe);
                     }
                 }
 
@@ -637,6 +666,10 @@ namespace BizTalkComponents.PipelineComponents
             //include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
             //bellow creates two regex groups, one of them contains the values in the middle (.*)
             Match innerMatch = Regex.Match(match.Value, String.Format(@"%{0}\((.*)\)%",macro));
+
+            if (innerMatch.Success == false)
+                throw new ArgumentException($"No match for regex {match.Value}", "CheckContextDateTime");
+
             string innerValue = String.Empty;
 
 
@@ -655,10 +688,10 @@ namespace BizTalkComponents.PipelineComponents
                 string dateformat = fileDateTime.ToString(innerValue);
                 input = input.Replace(match.Value, dateformat);
             }
-            catch (System.FormatException)
+            catch (System.FormatException fe)
             {
 
-                throw new Exception(String.Format("Invalid dateformat {0} for macro {1}" + innerMatch.Value,macro));
+                throw new Exception(String.Format("Invalid dateformat {0} for macro {1}" + innerMatch.Value,macro), fe);
             }
 
             return input;
@@ -668,28 +701,7 @@ namespace BizTalkComponents.PipelineComponents
       
         #endregion
 
-        /// <summary>
-        /// Loads configuration property for component.
-        /// </summary>
-        /// <param name="pb">Configuration property bag.</param>
-        /// <param name="errlog">Error status (not used in this code).</param>
-        public void Load(Microsoft.BizTalk.Component.Interop.IPropertyBag pb, Int32 errlog)
-        {
-            return;
-
-        }
-
-        /// <summary>
-        /// Saves current component configuration into the property bag.
-        /// </summary>
-        /// <param name="pb">Configuration property bag.</param>
-        /// <param name="fClearDirty">Not used.</param>
-        /// <param name="fSaveAllProperties">Not used.</param>
-        public void Save(Microsoft.BizTalk.Component.Interop.IPropertyBag pb, bool fClearDirty, bool fSaveAllProperties)
-        {
-            return;
-
-        }
+      
        
     }
 
