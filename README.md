@@ -4,6 +4,7 @@ Adds custom SendPort macros<br/>
 
 If the PipelineComponent is used in any stage in a sendport pipeline, the following custom macros will be available
 One of the goals was to not use pipeline properties, just plug-and-play.<br/>
+I have added an option/parameter to specify that expected Context must be found, by default this is false to be backwards compatible<br/>
 
 **%FileNameOnly%**<br/>    Like %SourceFileName% but without the file extension.<br/>
 
@@ -73,4 +74,6 @@ Example: <br/>%DateTimeFormat(FILE.FileCreated,yyyy)%<br/>%DateTimeFormat(\~Invo
 Example: If incomming filename is  P123789.txt and sendport filename is Q%FilePattern([0-9]+)%.txt, Then outgoing filename would result in Q123789.txt<br/>
 The component also handle groups in RegEx expression. For example if the expression is "%FilePattern(\_([0-9]{3})\_)%.pdf" and the filename is "WAP_123_12345.xml" then the result would be "123.pdf".<br/>
 _Only the first RegEx group will be returned._
+
+**%FileExtension%** Returns the fileextension from sourcefilename.<br/>
 
