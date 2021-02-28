@@ -59,7 +59,6 @@
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BizTalkComponents.PipelineComponents.CustomMacros, Version=1.0.1.0, Culture=neutral, PublicKeyToken=47190f56632fbc76, processorArchitecture=MSIL" />
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -109,6 +108,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\PipelineComponent\BizTalkComponents.PipelineComponents.CustomMacros.csproj">
+      <Project>{bf420889-20fd-46f2-a3a7-d1a1eace90c6}</Project>
+      <Name>BizTalkComponents.PipelineComponents.CustomMacros</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\BizTalk\BizTalkC.targets" />

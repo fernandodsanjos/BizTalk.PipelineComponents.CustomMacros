@@ -1,2 +1,0 @@
-Attempting to build package from 'BizTalkComponents.PipelineComponents.CustomMacros.nuspec'.
-Successfully created package 'D:\work\BizTalk.PipelineComponents.CustomMacros\PipelineComponent\BizTalkComponents.PipelineComponents.CustomMacros.1.2.1.nupkg'.

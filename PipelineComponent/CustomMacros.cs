@@ -60,7 +60,7 @@ namespace BizTalkComponents.PipelineComponents
         static private string Macros()
         {
             //2020-04-06 Added array to easier add new macros and see what macros already exists
-            string[] _macros = new string[14];
+            string[] _macros = new string[15];
             _macros[0] = @"%FilePattern\([^%]+\)%";
             _macros[1] = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
             _macros[2] = @"%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
@@ -75,6 +75,7 @@ namespace BizTalkComponents.PipelineComponents
             _macros[11] = @"%UTCAddDays\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
             _macros[12] = @"%UTCAddMonths\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
             _macros[13] = @"%UTCAddYears\([-]*\d*,[%YyMmDdTHhSs:\-fzZkK\s]*\)%";
+            _macros[14] = @"%FileExtension%";
 
             return String.Join("|", _macros);
 
@@ -191,6 +192,20 @@ namespace BizTalkComponents.PipelineComponents
                      
                      transport = transport.Replace("%FileNameOnly%", receivedFileName);
                  }
+                else if (match.Value == "%FileExtension%")
+                {
+                    val = pInMsg.Context.Read("ReceivedFileName", ns_FILE);
+
+                    if (val == null || String.IsNullOrWhiteSpace((string)val))
+                    {
+                        transport = transport.Replace(match.Value, "");
+                        continue;
+                    }
+
+                    string fileExtension = Path.GetExtension((string)val);
+
+                    transport = transport.Replace("%FileExtension%", fileExtension);
+                }
                  else if (match.Value.StartsWith("%FilePattern("))
                  {
                      val = pInMsg.Context.Read("ReceivedFileName", ns_FILE);
@@ -224,13 +239,10 @@ namespace BizTalkComponents.PipelineComponents
 
                 string transportType = (string)pInMsg.Context.Read("OutboundTransportType", ns_BTS);
 
-                if (transport.Contains("\\\\"))
-                    throw new ArgumentException($"Directory path is invalid {transport}");
-
                 if (transportType == "FILE")
                 {
                     string dirname = Path.GetDirectoryName(transport);
-                    //Will create the new directory structure if it does not exist, only applies to FOLDER
+                    //Will create the new directory structure if it does not exist
                     System.IO.Directory.CreateDirectory(dirname);
                 }
                 
@@ -257,6 +269,7 @@ namespace BizTalkComponents.PipelineComponents
 
         #region Private methods
 
+      
         private string DateTimeFormat(IBaseMessage msg, string input, Match match)
         {
             string retpart = String.Empty;
