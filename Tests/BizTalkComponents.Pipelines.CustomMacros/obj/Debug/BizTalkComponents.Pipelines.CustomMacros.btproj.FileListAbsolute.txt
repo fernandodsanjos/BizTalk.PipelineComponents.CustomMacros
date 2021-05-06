@@ -1,4 +1,0 @@
-C:\work\BizTalkComponents.PipelineComponents\CustomMacros\Tests\BizTalkComponents.Pipelines.CustomMacros\bin\Debug\BizTalkComponents.Pipelines.CustomMacros.dll
-C:\work\BizTalkComponents.PipelineComponents\CustomMacros\Tests\BizTalkComponents.Pipelines.CustomMacros\bin\Debug\BizTalkComponents.Pipelines.CustomMacros.pdb
-C:\work\BizTalkComponents.PipelineComponents\CustomMacros\Tests\BizTalkComponents.Pipelines.CustomMacros\obj\Debug\BizTalkComponents.Pipelines.CustomMacros.dll
-C:\work\BizTalkComponents.PipelineComponents\CustomMacros\Tests\BizTalkComponents.Pipelines.CustomMacros\obj\Debug\BizTalkComponents.Pipelines.CustomMacros.pdb

@@ -59,6 +59,10 @@
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="INT0103.Sales.Invoice.PipelineComponents, Version=1.0.0.1, Culture=neutral, PublicKeyToken=ad679348c203b092, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.BizTalk.EdiInt.PipelineComponents, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.BizTalk.Pipeline.Components, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.BizTalk.ReliableMessaging, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -91,7 +95,7 @@
     <Pipeline Include="CustomMacrosSendPipeline.btp">
       <TypeName>CustomMacrosSendPipeline</TypeName>
       <Namespace>BizTalkComponents.Pipelines.CustomMacros</Namespace>
-      <SubType>Task</SubType>
+      <SubType>Designer</SubType>
     </Pipeline>
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +117,7 @@
     <ProjectReference Include="..\..\PipelineComponent\BizTalkComponents.PipelineComponents.CustomMacros.csproj">
       <Project>{bf420889-20fd-46f2-a3a7-d1a1eace90c6}</Project>
       <Name>BizTalkComponents.PipelineComponents.CustomMacros</Name>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

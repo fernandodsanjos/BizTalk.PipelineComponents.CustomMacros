@@ -19,6 +19,8 @@ using Microsoft.XLANGs.RuntimeTypes;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
+using System.Drawing.Design;
+using Microsoft.BizTalk.SSOClient.Interop;
 
 namespace BizTalkComponents.PipelineComponents
 {
@@ -32,6 +34,7 @@ namespace BizTalkComponents.PipelineComponents
     {
         Dictionary<string,string> propertys = new Dictionary<string,string>();
 
+       
         /// <summary>
         /// If Context is not found an error is thrown
         /// </summary>
@@ -41,6 +44,10 @@ namespace BizTalkComponents.PipelineComponents
             get; set;
         } = false;
 
+        [Category("Authentication")]
+        [DisplayName("SSOAffiliate")]
+        [Description("The Single Sign On (SSO) Affiliate Application")]
+        public string SSOAffiliate { get; set; }
 
         enum DateTimeTypes
         {
@@ -230,35 +237,56 @@ namespace BizTalkComponents.PipelineComponents
                 }
                     
             }
-                   
-            
-
-            if (transport.Contains("%Folder%"))
-            {
-                transport = transport.Replace("%Folder%", @"\");
-
-                string transportType = (string)pInMsg.Context.Read("OutboundTransportType", ns_BTS);
-
-                if (transportType == "FILE")
-                {
-                    string dirname = Path.GetDirectoryName(transport);
-                    //Will create the new directory structure if it does not exist
-                    System.IO.Directory.CreateDirectory(dirname);
-                }
-                
-            }
 
             //2018-03-12 Added %Root% Message root node
+            //2021-05-06 moved above Folder makro
+
             if (transport.Contains("%Root%"))
             {
                 BTS.MessageType msg = new BTS.MessageType();
 
                 string msgType = (string)pInMsg.Context.Read(msg.Name.Name, msg.Name.Namespace);
 
-   
+
 
                 transport = transport.Replace("%Root%", msgType.Substring(msgType.IndexOf('#') + 1));
             }
+
+            if (transport.Contains("%Folder%"))
+            {
+                transport = transport.Replace("%Folder%", @"\");
+
+                string transportType = (string)pInMsg.Context.Read("OutboundTransportType", ns_BTS);
+                string dirname = Path.GetDirectoryName(transport);
+
+                if (transportType == "FILE")
+                {
+                    //2021-05-06 Added affiliate for impersonation
+                    if (!(String.IsNullOrEmpty(SSOAffiliate)))
+                    {
+                        var cred = GetSSOCredentials(SSOAffiliate);
+
+                        using (Impersonate imp = new Impersonate(cred.Username, cred.Password))
+                        {
+                            //Will create the new directory structure if it does not exist
+                            System.IO.Directory.CreateDirectory(dirname);
+                        };
+
+                    }
+                    else
+                    {
+                        //Will create the new directory structure if it does not exist
+                        System.IO.Directory.CreateDirectory(dirname);
+                    }
+                    
+
+                        
+                  
+                }
+                
+            }
+
+           
 
             pInMsg.Context.Promote("OutboundTransportLocation", ns_BTS, (object)transport);
 
@@ -269,7 +297,17 @@ namespace BizTalkComponents.PipelineComponents
 
         #region Private methods
 
-      
+        private Credentials GetSSOCredentials(string affiliate)
+        {
+            string externalUsername;
+            ISSOLookup1 lookup = new ISSOLookup1();
+            string[] creds = lookup.GetCredentials(affiliate, 0, out externalUsername);
+
+            return new Credentials { Username = externalUsername, Password = creds[0] };
+
+        }
+
+
         private string DateTimeFormat(IBaseMessage msg, string input, Match match)
         {
             string retpart = String.Empty;

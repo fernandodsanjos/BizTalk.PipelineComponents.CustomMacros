@@ -1,5 +1,0 @@
-C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\bin\Debug\BizTalkComponents.PipelineComponents.XSLTransform.Map.dll
-C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\bin\Debug\BizTalkComponents.PipelineComponents.XSLTransform.Map.pdb
-C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\bin\Debug\BizTalkComponents.PipelineComponents.XSLTransform.Schema.dll
-C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\obj\Debug\BizTalkComponents.PipelineComponents.XSLTransform.Map.dll
-C:\work\BizTalkComponents.PipelineComponents\BizTalkComponents.PipelineComponents.XSLTransform\XSLTransform.Map\obj\Debug\BizTalkComponents.PipelineComponents.XSLTransform.Map.pdb
