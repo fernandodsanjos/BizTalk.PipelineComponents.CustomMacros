@@ -1,11 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizTalkComponents.PipelineComponents.CustomMacros", "PipelineComponent\BizTalkComponents.PipelineComponents.CustomMacros.csproj", "{BF420889-20FD-46F2-A3A7-D1A1EACE90C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizTalkComponents.PipelineComponents.CustomMacros", "BizTalk2016\PipelineComponent\BizTalkComponents.PipelineComponents.CustomMacros.csproj", "{BF420889-20FD-46F2-A3A7-D1A1EACE90C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizTalkComponents.Pipelines.CustomMacros", "Tests\BizTalkComponents.Pipelines.CustomMacros\BizTalkComponents.Pipelines.CustomMacros.btproj", "{76D3556A-EF9E-4888-BBEE-C8E64542351F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizTalkComponents.Pipelines.CustomMacros", "BizTalk2016\Tests\BizTalkComponents.Pipelines.CustomMacros\BizTalkComponents.Pipelines.CustomMacros.btproj", "{76D3556A-EF9E-4888-BBEE-C8E64542351F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BizTalk2016", "BizTalk2016", "{B4361963-4015-433D-9B2E-38F36812BF9C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BizTalk2020", "BizTalk2020", "{4CD26B1D-DB31-414F-BCA3-E0FCB5AE4569}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizTalkComponents.PipelineComponents.CustomMacros", "BizTalk2020\PipelineComponent\BizTalkComponents.PipelineComponents.CustomMacros.csproj", "{B2A548A5-53A4-44E8-B9A7-718F87E6D5E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizTalkComponents.Pipelines.CustomMacros", "BizTalk2020\Tests\BizTalkComponents.Pipelines.CustomMacros\BizTalkComponents.Pipelines.CustomMacros.btproj", "{896D5C00-955A-4001-A376-52979F9DF872}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{658F82AD-1CAE-406F-9FA4-E3796C423F3C}"
+	ProjectSection(SolutionItems) = preProject
+		BizTalkComponents.PipelineComponents.CustomMacros.nuspec = BizTalkComponents.PipelineComponents.CustomMacros.nuspec
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,8 +37,27 @@ Global
 		{76D3556A-EF9E-4888-BBEE-C8E64542351F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76D3556A-EF9E-4888-BBEE-C8E64542351F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{76D3556A-EF9E-4888-BBEE-C8E64542351F}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{B2A548A5-53A4-44E8-B9A7-718F87E6D5E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2A548A5-53A4-44E8-B9A7-718F87E6D5E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2A548A5-53A4-44E8-B9A7-718F87E6D5E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2A548A5-53A4-44E8-B9A7-718F87E6D5E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{896D5C00-955A-4001-A376-52979F9DF872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{896D5C00-955A-4001-A376-52979F9DF872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{896D5C00-955A-4001-A376-52979F9DF872}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{896D5C00-955A-4001-A376-52979F9DF872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{896D5C00-955A-4001-A376-52979F9DF872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{896D5C00-955A-4001-A376-52979F9DF872}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BF420889-20FD-46F2-A3A7-D1A1EACE90C6} = {B4361963-4015-433D-9B2E-38F36812BF9C}
+		{76D3556A-EF9E-4888-BBEE-C8E64542351F} = {B4361963-4015-433D-9B2E-38F36812BF9C}
+		{B2A548A5-53A4-44E8-B9A7-718F87E6D5E2} = {4CD26B1D-DB31-414F-BCA3-E0FCB5AE4569}
+		{896D5C00-955A-4001-A376-52979F9DF872} = {4CD26B1D-DB31-414F-BCA3-E0FCB5AE4569}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C96F1C46-1114-4299-80BF-92BB93BDF720}
 	EndGlobalSection
 EndGlobal

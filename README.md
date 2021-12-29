@@ -2,9 +2,23 @@
 # BizTalk.PipelineComponents.CustomMacros
 Adds custom SendPort macros<br/>
 
+## Properties
+|Name|Description|
+|--|--|
+|Must Exist|Target folder path must exist.|
+|Context Required|An erro is thrown if the specified Context cannot be found|
+|SSOAffiliate|Use SSO Application instead of host user|
+
 If the PipelineComponent is used in any stage in a sendport pipeline, the following custom macros will be available
-One of the goals was to not use pipeline properties, just plug-and-play.<br/>
-I have added an option/parameter to specify that expected Context must be found, by default this is false to be backwards compatible<br/>
+
+**Macros works for both Filename and folder**
+![Example](/MacroFolder.JPG?raw=true "Example")
+
+**%OriginalPath**<br/> Folder structure from incomming file, volume or drive letter excluded. 
+If inboundlocation is **D:\Integrations\Incomming\file.txt** then the macro returns **Integrations\Incomming**.<br/>
+
+**%OriginalFolder%**<br/> Returns folder name of inboundlocation. 
+If inboundlocation is **D:\Integrations\Incomming\file.txt** then the macro returns **Incomming**.<br/>
 
 **%FileNameOnly%**<br/>    Like %SourceFileName% but without the file extension.<br/>
 
