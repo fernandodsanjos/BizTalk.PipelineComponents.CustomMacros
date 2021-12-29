@@ -1,6 +1,6 @@
 
 # BizTalk.PipelineComponents.CustomMacros
-Adds custom SendPort macros<br/>
+Adds custom SendPort macros, works for both Filename and folder<br/>
 
 ## Properties
 |Name|Description|
@@ -9,15 +9,15 @@ Adds custom SendPort macros<br/>
 |Context Required|An erro is thrown if the specified Context cannot be found|
 |SSOAffiliate|Use SSO Application instead of host user|
 
+## Macros
 If the PipelineComponent is used in any stage in a sendport pipeline, the following custom macros will be available
 
-**Macros works for both Filename and folder**
 ![Example](/MacroFolder.JPG?raw=true "Example")
 
-**%OriginalPath**<br/> Folder structure from incomming file, volume or drive letter excluded. 
+**%OriginalPath%**<br/> Folder structure from incomming file, volume or drive letter excluded. 
 If inboundlocation is **D:\Integrations\Incomming\file.txt** then the macro returns **Integrations\Incomming**.<br/>
 
-**%OriginalFolder%**<br/> Returns folder name of inboundlocation. 
+**%OriginalFolder%**<br/> Returns original folder name. 
 If inboundlocation is **D:\Integrations\Incomming\file.txt** then the macro returns **Incomming**.<br/>
 
 **%FileNameOnly%**<br/>    Like %SourceFileName% but without the file extension.<br/>
