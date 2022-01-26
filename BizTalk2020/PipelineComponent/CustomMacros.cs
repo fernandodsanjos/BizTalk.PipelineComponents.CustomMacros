@@ -154,13 +154,18 @@ namespace BizTalkComponents.PipelineComponents
 
                 var directory = Path.GetDirectoryName(ReceivedFileName);
 
-                var folderStructure = directory.Split(new string[] { @"\" }, StringSplitOptions.RemoveEmptyEntries);
+                if(String.IsNullOrEmpty(directory) == false)
+                {
+                    var folderStructure = directory.Split(new string[] { @"\" }, StringSplitOptions.RemoveEmptyEntries);
 
-                OriginalFolder = folderStructure[folderStructure.Length - 1];
+                    OriginalFolder = folderStructure[folderStructure.Length - 1];
 
-                var firstFolder = directory.StartsWith(@"\\") ? 0 : 1;
+                    var firstFolder = directory.StartsWith(@"\\") ? 0 : 1;
 
-                OriginalPath = String.Join(@"\", folderStructure, firstFolder, folderStructure.Length - firstFolder);
+                    OriginalPath = String.Join(@"\", folderStructure, firstFolder, folderStructure.Length - firstFolder);
+                }
+
+                
             }
 
 
