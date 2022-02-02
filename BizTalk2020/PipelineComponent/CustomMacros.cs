@@ -64,7 +64,9 @@ namespace BizTalkComponents.PipelineComponents
 
         private string OriginalPath { get; set; }
 
-        private string Directory { get; set; }
+        private string ParentFolder { get; set; } = String.Empty;
+
+        private string Directory { get; set; } = String.Empty;
         #endregion
         enum DateTimeTypes
         {
@@ -161,6 +163,9 @@ namespace BizTalkComponents.PipelineComponents
                     var folderStructure = Directory.Split(new string[] { @"\" }, StringSplitOptions.RemoveEmptyEntries);
 
                     OriginalFolder = folderStructure[folderStructure.Length - 1];
+
+                    if((folderStructure.Length - 2) > -1)
+                        ParentFolder = folderStructure[folderStructure.Length - 2];
 
                     var firstFolder = Directory.StartsWith(@"\\") ? 0 : 1;
 
@@ -297,6 +302,11 @@ namespace BizTalkComponents.PipelineComponents
             }
             //2018-03-12 Added %Root% Message root node
             //2021-05-06 moved above Folder makro
+
+            if(transport.Contains("%ParentFolder%"))
+            {
+                transport = transport.Replace("%ParentFolder%", ParentFolder);
+            }
 
             if (transport.Contains("%Root%"))
             {

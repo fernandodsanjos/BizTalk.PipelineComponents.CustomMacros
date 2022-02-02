@@ -32,7 +32,7 @@ namespace BizTalkComponents.PipelineComponents
     [System.Runtime.InteropServices.Guid("45A34C0D-8D73-45fd-960D-DB365CD56371")]
     public partial class CustomMacros : IBaseComponent
     {
-        Dictionary<string,string> propertys = new Dictionary<string,string>();
+        Dictionary<string, string> propertys = new Dictionary<string, string>();
 
         /// <summary>
         /// Targetfolder must exist. 
@@ -43,7 +43,7 @@ namespace BizTalkComponents.PipelineComponents
             get; set;
         } = false;
 
-        
+
         [DisplayName("Context Required")]
         public bool ContextRequired
         {
@@ -63,8 +63,10 @@ namespace BizTalkComponents.PipelineComponents
         private string OriginalFolder { get; set; }
 
         private string OriginalPath { get; set; }
-        
-        private string Directory { get; set; }
+
+        private string ParentFolder { get; set; } = String.Empty;
+
+        private string Directory { get; set; } = String.Empty;
         #endregion
         enum DateTimeTypes
         {
@@ -80,7 +82,7 @@ namespace BizTalkComponents.PipelineComponents
         readonly string macros = Macros();
 
         //readonly string macros = @"%FilePattern\([^%]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%|%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
-       
+
         static private string Macros()
         {
             //2020-04-06 Added array to easier add new macros and see what macros already exists
@@ -112,20 +114,20 @@ namespace BizTalkComponents.PipelineComponents
         }
         public CustomMacros()
         {
-            propertys = new Dictionary<string,string>();
+            propertys = new Dictionary<string, string>();
 
-            propertys.Add("SBMessaging","http://schemas.microsoft.com/BizTalk/2012/Adapter/BrokeredMessage-properties");
-            propertys.Add("POP3","http://schemas.microsoft.com/BizTalk/2003/pop3-properties");
-            propertys.Add("MSMQT","http://schemas.microsoft.com/BizTalk/2003/msmqt-properties");
-            propertys.Add("ErrorReport","http://schemas.microsoft.com/BizTalk/2005/error-report");
-            propertys.Add("EdiOverride","http://schemas.microsoft.com/BizTalk/2006/edi-properties");
-            propertys.Add("EDI","http://schemas.microsoft.com/Edi/PropertySchema");
-            propertys.Add("EdiIntAS","http://schemas.microsoft.com/BizTalk/2006/as2-properties");
-            propertys.Add("BTF2","http://schemas.microsoft.com/BizTalk/2003/btf2-properties");
-            propertys.Add("BTS","http://schemas.microsoft.com/BizTalk/2003/system-properties");
-            propertys.Add("FILE","http://schemas.microsoft.com/BizTalk/2003/file-properties");
+            propertys.Add("SBMessaging", "http://schemas.microsoft.com/BizTalk/2012/Adapter/BrokeredMessage-properties");
+            propertys.Add("POP3", "http://schemas.microsoft.com/BizTalk/2003/pop3-properties");
+            propertys.Add("MSMQT", "http://schemas.microsoft.com/BizTalk/2003/msmqt-properties");
+            propertys.Add("ErrorReport", "http://schemas.microsoft.com/BizTalk/2005/error-report");
+            propertys.Add("EdiOverride", "http://schemas.microsoft.com/BizTalk/2006/edi-properties");
+            propertys.Add("EDI", "http://schemas.microsoft.com/Edi/PropertySchema");
+            propertys.Add("EdiIntAS", "http://schemas.microsoft.com/BizTalk/2006/as2-properties");
+            propertys.Add("BTF2", "http://schemas.microsoft.com/BizTalk/2003/btf2-properties");
+            propertys.Add("BTS", "http://schemas.microsoft.com/BizTalk/2003/system-properties");
+            propertys.Add("FILE", "http://schemas.microsoft.com/BizTalk/2003/file-properties");
             propertys.Add("MessageTracking", "http://schemas.microsoft.com/BizTalk/2003/file-properties");
-            
+
         }
 
         #region IComponent Members
@@ -134,7 +136,7 @@ namespace BizTalkComponents.PipelineComponents
         {
             CultureInfo ci = CultureInfo.InvariantCulture;
             object val = null;
-            
+
             //%Folder% = Adds a backslash
             //Does the filemask have any custom macros
             string transport = (string)pInMsg.Context.Read("OutboundTransportLocation", ns_BTS);
@@ -146,7 +148,7 @@ namespace BizTalkComponents.PipelineComponents
 
             ReceivedFileName = (string)pInMsg.Context.Read("ReceivedFileName", ns_FILE);
 
-            if(String.IsNullOrEmpty(ReceivedFileName))
+            if (String.IsNullOrEmpty(ReceivedFileName))
             {
                 FileNameMissing = true;
             }
@@ -161,6 +163,9 @@ namespace BizTalkComponents.PipelineComponents
                     var folderStructure = Directory.Split(new string[] { @"\" }, StringSplitOptions.RemoveEmptyEntries);
 
                     OriginalFolder = folderStructure[folderStructure.Length - 1];
+
+                    if ((folderStructure.Length - 2) > -1)
+                        ParentFolder = folderStructure[folderStructure.Length - 2];
 
                     var firstFolder = Directory.StartsWith(@"\\") ? 0 : 1;
 
@@ -293,10 +298,15 @@ namespace BizTalkComponents.PipelineComponents
                     transport = FolderRange(transport, match);
                 }
 
-                
+
             }
-                //2018-03-12 Added %Root% Message root node
-                //2021-05-06 moved above Folder makro
+            //2018-03-12 Added %Root% Message root node
+            //2021-05-06 moved above Folder makro
+
+            if (transport.Contains("%ParentFolder%"))
+            {
+                transport = transport.Replace("%ParentFolder%", ParentFolder);
+            }
 
             if (transport.Contains("%Root%"))
             {
@@ -318,20 +328,20 @@ namespace BizTalkComponents.PipelineComponents
 
                 if (transportType == "FILE")
                 {
-                   
-                   
-                        //2021-05-06 Added affiliate for impersonation
-                        if (String.IsNullOrEmpty(SSOAffiliate))
-                        {
-                            if (System.IO.Directory.Exists(dirname) == false && MustExist)
-                                throw new DirectoryNotFoundException($"Directory {dirname} not found");
 
-                            //Will create the new directory structure if it does not exist
-                            System.IO.Directory.CreateDirectory(dirname);
-                        
-                        }
-                        else
-                        {
+
+                    //2021-05-06 Added affiliate for impersonation
+                    if (String.IsNullOrEmpty(SSOAffiliate))
+                    {
+                        if (System.IO.Directory.Exists(dirname) == false && MustExist)
+                            throw new DirectoryNotFoundException($"Directory {dirname} not found");
+
+                        //Will create the new directory structure if it does not exist
+                        System.IO.Directory.CreateDirectory(dirname);
+
+                    }
+                    else
+                    {
 
                         var cred = GetSSOCredentials(SSOAffiliate);
 
@@ -345,13 +355,13 @@ namespace BizTalkComponents.PipelineComponents
                             System.IO.Directory.CreateDirectory(dirname);
                         };
                     }
-    
-                  
+
+
                 }
-                
+
             }
 
-           
+
 
             pInMsg.Context.Promote("OutboundTransportLocation", ns_BTS, (object)transport);
 
@@ -430,41 +440,41 @@ namespace BizTalkComponents.PipelineComponents
             {
 
                 if (ContextRequired)
-                    throw new FormatException($"Context {parts[0]} could not be evaluated to DateTime!",fe);
+                    throw new FormatException($"Context {parts[0]} could not be evaluated to DateTime!", fe);
             }
             finally
             {
 
-                 input = input.Replace(match.Value, retpart);
-               
+                input = input.Replace(match.Value, retpart);
+
             }
 
             return input;
 
         }
 
-        object CustomMacro(IBaseMessage msg,string ctxName)
+        object CustomMacro(IBaseMessage msg, string ctxName)
         {
             object val = null;
 
-                for (int i = 0; i < msg.Context.CountProperties; i++)
+            for (int i = 0; i < msg.Context.CountProperties; i++)
+            {
+                string name = String.Empty;
+                string ns = String.Empty;
+
+                object context_val = msg.Context.ReadAt(i, out name, out ns);
+
+                if (ns.StartsWith("http://schemas.microsoft.com/BizTalk/") == false && ctxName == name)
                 {
-                    string name = String.Empty;
-                    string ns = String.Empty;
-
-                    object context_val = msg.Context.ReadAt(i, out name, out ns);
-
-                    if (ns.StartsWith("http://schemas.microsoft.com/BizTalk/") == false && ctxName == name)
-                    {
-                        val = context_val;
-                        break;
-                    }
-                       
-
+                    val = context_val;
+                    break;
                 }
 
-                return val; 
-            
+
+            }
+
+            return val;
+
         }
 
         static string GetFileParts(string input, string fileName, Match match)
@@ -526,13 +536,13 @@ namespace BizTalkComponents.PipelineComponents
                 {
                     val = CustomMacro(msg, ctx[1]);
                 }
-                else if(String.IsNullOrWhiteSpace(ns) == false)
+                else if (String.IsNullOrWhiteSpace(ns) == false)
                 {
-                     val = msg.Context.Read(ctx[1], ns);
+                    val = msg.Context.Read(ctx[1], ns);
                 }
             }
 
-           
+
             return val;
 
         }
@@ -546,7 +556,7 @@ namespace BizTalkComponents.PipelineComponents
 
             string innerValue = String.Empty;
             object val = null;
-           
+
 
             foreach (Group item in innerMatch.Groups)
             {
@@ -561,22 +571,22 @@ namespace BizTalkComponents.PipelineComponents
             //Added possibility to use distinguished fields
             val = GetContextValue(innerValue, msg);
 
-            if(val == null && ContextRequired)
+            if (val == null && ContextRequired)
                 throw new KeyNotFoundException($"Context {innerValue} not found!");
-            
-               
+
+
             //2019-02-13 FIX for invalid conversion
             //2019-02-25 BUG FIX for null value
             if (val != null && !(val is string))
                 val = val.ToString();
 
             if (val == null || String.IsNullOrWhiteSpace((string)val))
-            { 
-                input =  input.Replace(match.Value, ""); 
+            {
+                input = input.Replace(match.Value, "");
             }
             else
             {
-                input = input.Replace(match.Value, (string)val); 
+                input = input.Replace(match.Value, (string)val);
 
             }
 
@@ -589,9 +599,9 @@ namespace BizTalkComponents.PipelineComponents
             return CheckDateTime(input, match, false);
         }
 
-        string CheckDateTime(string input,Match match, bool utc)
+        string CheckDateTime(string input, Match match, bool utc)
         {
-            
+
             //include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
             //bellow creates two regex groups, one of them contains the values in the middle (.*)
             Match innerMatch = Regex.Match(match.Value, @"%[UTC]*DateTime\((.*)\)%");
@@ -601,40 +611,40 @@ namespace BizTalkComponents.PipelineComponents
 
             string innerValue = String.Empty;
 
-                 
-                foreach (Group item in innerMatch.Groups)
+
+            foreach (Group item in innerMatch.Groups)
+            {
+                if (item.Value != match.Value)
                 {
-                    if (item.Value != match.Value)
-                    { 
-                        innerValue = item.Value;
-                        break;
-                    }
-                        
+                    innerValue = item.Value;
+                    break;
                 }
 
-                try
-                {
-                    string dateformat = String.Empty;
+            }
 
-                    if(utc)
-                    {
-                        dateformat = DateTime.UtcNow.ToString(innerValue);
-                    }
-                    else
-                    {
-                        dateformat = DateTime.Now.ToString(innerValue);
-                    }
-                    
-                    input = input.Replace(match.Value, dateformat);
+            try
+            {
+                string dateformat = String.Empty;
+
+                if (utc)
+                {
+                    dateformat = DateTime.UtcNow.ToString(innerValue);
                 }
-                catch (System.FormatException fe)
+                else
                 {
-
-                    throw new Exception("Invalid dateformat " + innerMatch.Value,fe);
+                    dateformat = DateTime.Now.ToString(innerValue);
                 }
 
-                return input;
-                
+                input = input.Replace(match.Value, dateformat);
+            }
+            catch (System.FormatException fe)
+            {
+
+                throw new Exception("Invalid dateformat " + innerMatch.Value, fe);
+            }
+
+            return input;
+
         }
 
         private string UtcDateTimeAdd(string input, string pattern, DateTimeTypes dtType)
@@ -773,13 +783,13 @@ namespace BizTalkComponents.PipelineComponents
                 string ns = String.Empty;
 
                 object context_val = msg.Context.ReadAt(i, out name, out ns);
-                
+
                 if (ns.EndsWith("btsDistinguishedFields") == true && DistinguishedString(name).EndsWith(input))
                 {
                     val = context_val;
                     break;
                 }
-                
+
             }
 
             return (string)val;
@@ -800,12 +810,12 @@ namespace BizTalkComponents.PipelineComponents
             return builder.ToString();
         }
 
-        string CheckContextDateTime(string input, Match match, DateTime fileDateTime,string macro)
+        string CheckContextDateTime(string input, Match match, DateTime fileDateTime, string macro)
         {
 
             //include a percent ("%") format specifier before the single custom date and time specifier. like d,m e.t.c
             //bellow creates two regex groups, one of them contains the values in the middle (.*)
-            Match innerMatch = Regex.Match(match.Value, String.Format(@"%{0}\((.*)\)%",macro));
+            Match innerMatch = Regex.Match(match.Value, String.Format(@"%{0}\((.*)\)%", macro));
 
             if (innerMatch.Success == false)
                 throw new ArgumentException($"No match for regex {match.Value}", "CheckContextDateTime");
@@ -831,20 +841,20 @@ namespace BizTalkComponents.PipelineComponents
             catch (System.FormatException fe)
             {
 
-                throw new Exception(String.Format("Invalid dateformat {0} for macro {1}" + innerMatch.Value,macro), fe);
+                throw new Exception(String.Format("Invalid dateformat {0} for macro {1}" + innerMatch.Value, macro), fe);
             }
 
             return input;
 
         }
 
-      
+
         #endregion
 
-      
-       
+
+
     }
 
 
-    
+
 }
