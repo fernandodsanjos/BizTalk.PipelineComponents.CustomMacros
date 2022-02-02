@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <BindingInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Assembly="Microsoft.BizTalk.Deployment, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" Version="3.5.1.0" BindingStatus="NoBindings" BoundEndpoints="0" TotalEndpoints="0">
-  <Timestamp>2021-12-29T15:37:58.6319533+01:00</Timestamp>
+  <Timestamp>2022-02-02T13:06:02.5112243+01:00</Timestamp>
   <ModuleRefCollection>
     <ModuleRef Name="[Application:Shared.Pipelines]" Version="" Culture="" PublicKeyToken="" FullName="[Application:Shared.Pipelines], Version=, Culture=, PublicKeyToken=">
       <Services />
@@ -14,11 +14,11 @@
   <SendPortCollection>
     <SendPort Name="CustomMacros" IsStatic="true" IsTwoWay="false" BindingOption="0" AnalyticsEnabled="false">
       <Description xsi:nil="true" />
-      <TransmitPipeline Name="BizTalkComponents.Pipelines.CustomMacros.CustomMacrosSendPipeline" FullyQualifiedName="BizTalkComponents.Pipelines.CustomMacros.CustomMacrosSendPipeline, BizTalkComponents.Pipelines.CustomMacros, Version=1.0.0.0, Culture=neutral, PublicKeyToken=47190f56632fbc76" Type="2" TrackingOption="ServiceStartEnd MessageSendReceive PipelineEvents" />
+      <TransmitPipeline Name="BizTalkComponents.Pipelines.CustomMacros.CustomMacrosSendPipeline" FullyQualifiedName="BizTalkComponents.Pipelines.CustomMacros.CustomMacrosSendPipeline, BizTalkComponents.Pipelines.CustomMacros, Version=1.0.0.0, Culture=neutral, PublicKeyToken=47190f56632fbc76" Type="2" TrackingOption="ServiceStartEnd MessageSendReceive PipelineEvents" Description="" />
       <PrimaryTransport>
-        <Address>D:\%OriginalPath%%Folder%Transfered%Folder%%SourceFileName%</Address>
+        <Address>D:\%OriginalPath%\Transfered\%SourceFileName%</Address>
         <TransportType Name="FILE" Capabilities="11" ConfigurationClsid="5e49e3a6-b4fc-4077-b44c-22f34a242fdb" />
-        <TransportTypeData>&lt;CustomProps&gt;&lt;UseTempFileOnWrite vt="11"&gt;0&lt;/UseTempFileOnWrite&gt;&lt;AllowCacheOnWrite vt="11"&gt;0&lt;/AllowCacheOnWrite&gt;&lt;CopyMode vt="19"&gt;1&lt;/CopyMode&gt;&lt;FileName vt="8"&gt;%OriginalPath%%Folder%Transfered%Folder%%SourceFileName%&lt;/FileName&gt;&lt;/CustomProps&gt;</TransportTypeData>
+        <TransportTypeData>&lt;CustomProps&gt;&lt;UseTempFileOnWrite vt="11"&gt;0&lt;/UseTempFileOnWrite&gt;&lt;AllowCacheOnWrite vt="11"&gt;0&lt;/AllowCacheOnWrite&gt;&lt;CopyMode vt="19"&gt;1&lt;/CopyMode&gt;&lt;FileName vt="8"&gt;%SourceFileName%&lt;/FileName&gt;&lt;/CustomProps&gt;</TransportTypeData>
         <RetryCount>0</RetryCount>
         <RetryInterval>5</RetryInterval>
         <ServiceWindowEnabled>false</ServiceWindowEnabled>
@@ -27,7 +27,7 @@
         <Primary>true</Primary>
         <OrderedDelivery>false</OrderedDelivery>
         <DeliveryNotification>1</DeliveryNotification>
-        <SendHandler Name="Default_Send" HostTrusted="false">
+        <SendHandler Name="Default_Send" HostTrusted="true">
           <TransportType Name="FILE" Capabilities="11" ConfigurationClsid="5e49e3a6-b4fc-4077-b44c-22f34a242fdb" />
         </SendHandler>
       </PrimaryTransport>
@@ -58,6 +58,53 @@
       <RouteFailedMessage>false</RouteFailedMessage>
       <ApplicationName>Shared.Pipelines</ApplicationName>
     </SendPort>
+    <SendPort Name="FolderRange" IsStatic="true" IsTwoWay="false" BindingOption="0" AnalyticsEnabled="false">
+      <Description xsi:nil="true" />
+      <TransmitPipeline Name="BizTalkComponents.Pipelines.CustomMacros.CustomMacrosSendPipeline" FullyQualifiedName="BizTalkComponents.Pipelines.CustomMacros.CustomMacrosSendPipeline, BizTalkComponents.Pipelines.CustomMacros, Version=1.0.0.0, Culture=neutral, PublicKeyToken=47190f56632fbc76" Type="2" TrackingOption="ServiceStartEnd MessageSendReceive PipelineEvents" Description="" />
+      <SendPipelineData>&lt;Root xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;&lt;Stages&gt;&lt;Stage CategoryId="9d0e4108-4cce-4536-83fa-4a5040674ad6"&gt;&lt;Components&gt;&lt;Component Name="BizTalkComponents.PipelineComponents.CustomMacros"&gt;&lt;Properties&gt;&lt;MustExist vt="11"&gt;-1&lt;/MustExist&gt;&lt;/Properties&gt;&lt;/Component&gt;&lt;/Components&gt;&lt;/Stage&gt;&lt;/Stages&gt;&lt;/Root&gt;</SendPipelineData>
+      <PrimaryTransport>
+        <Address>D:\%FolderRange(1,3)%\Archive\%OriginalFolder%\%SourceFileName%</Address>
+        <TransportType Name="FILE" Capabilities="11" ConfigurationClsid="5e49e3a6-b4fc-4077-b44c-22f34a242fdb" />
+        <TransportTypeData>&lt;CustomProps&gt;&lt;UseTempFileOnWrite vt="11"&gt;0&lt;/UseTempFileOnWrite&gt;&lt;AllowCacheOnWrite vt="11"&gt;0&lt;/AllowCacheOnWrite&gt;&lt;CopyMode vt="19"&gt;1&lt;/CopyMode&gt;&lt;FileName vt="8"&gt;%SourceFileName%&lt;/FileName&gt;&lt;/CustomProps&gt;</TransportTypeData>
+        <RetryCount>0</RetryCount>
+        <RetryInterval>5</RetryInterval>
+        <ServiceWindowEnabled>false</ServiceWindowEnabled>
+        <FromTime>2022-02-01T23:00:00</FromTime>
+        <ToTime>2022-02-02T22:59:59</ToTime>
+        <Primary>true</Primary>
+        <OrderedDelivery>false</OrderedDelivery>
+        <DeliveryNotification>1</DeliveryNotification>
+        <SendHandler Name="Default_Send" HostTrusted="true">
+          <TransportType Name="FILE" Capabilities="11" ConfigurationClsid="5e49e3a6-b4fc-4077-b44c-22f34a242fdb" />
+        </SendHandler>
+      </PrimaryTransport>
+      <SecondaryTransport>
+        <Address />
+        <RetryCount>3</RetryCount>
+        <RetryInterval>5</RetryInterval>
+        <ServiceWindowEnabled>false</ServiceWindowEnabled>
+        <FromTime>2022-02-01T23:00:00</FromTime>
+        <ToTime>2022-02-02T22:59:59</ToTime>
+        <Primary>false</Primary>
+        <OrderedDelivery>false</OrderedDelivery>
+        <DeliveryNotification>1</DeliveryNotification>
+        <SendHandler xsi:nil="true" />
+      </SecondaryTransport>
+      <ReceivePipelineData xsi:nil="true" />
+      <Tracking>0</Tracking>
+      <Filter>&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;Filter xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;Group&gt;
+    &lt;Statement Property="BTS.ReceivePortName" Operator="0" Value="CustomMacros" /&gt;
+  &lt;/Group&gt;
+&lt;/Filter&gt;</Filter>
+      <Transforms />
+      <OrderedDelivery>false</OrderedDelivery>
+      <Priority>5</Priority>
+      <StopSendingOnFailure>false</StopSendingOnFailure>
+      <RouteFailedMessage>false</RouteFailedMessage>
+      <ApplicationName>Shared.Pipelines</ApplicationName>
+    </SendPort>
   </SendPortCollection>
   <DistributionListCollection />
   <ReceivePortCollection>
@@ -66,7 +113,7 @@
       <ReceiveLocations>
         <ReceiveLocation Name="CustomMacros">
           <Description xsi:nil="true" />
-          <Address>D:\Integrations\Shared.Pipelines\In\*copy*</Address>
+          <Address>D:\Integrations\Shared.Pipelines\In\Attachment\*copy*</Address>
           <PublicAddress />
           <Primary>true</Primary>
           <ReceiveLocationServiceWindowEnabled>false</ReceiveLocationServiceWindowEnabled>
@@ -83,7 +130,7 @@
           <SendPipeline xsi:nil="true" />
           <SendPipelineData xsi:nil="true" />
           <Enable>true</Enable>
-          <ReceiveHandler Name="Default_Receive" HostTrusted="false">
+          <ReceiveHandler Name="Default_Receive" HostTrusted="true">
             <TransportType Name="FILE" Capabilities="11" ConfigurationClsid="5e49e3a6-b4fc-4077-b44c-22f34a242fdb" />
           </ReceiveHandler>
           <ScheduleRecurrenceType>None</ScheduleRecurrenceType>

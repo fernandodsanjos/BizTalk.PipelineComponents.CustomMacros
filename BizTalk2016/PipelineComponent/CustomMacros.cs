@@ -64,6 +64,7 @@ namespace BizTalkComponents.PipelineComponents
 
         private string OriginalPath { get; set; }
         
+        private string Directory { get; set; }
         #endregion
         enum DateTimeTypes
         {
@@ -86,12 +87,12 @@ namespace BizTalkComponents.PipelineComponents
 
             //%Folder% = Adds a backslash
 
-            string[] _macros = new string[17];
+            string[] _macros = new string[18];
             _macros[0] = @"%FilePattern\([^%]+\)%";
             _macros[1] = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
             _macros[2] = @"%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
             _macros[3] = @"%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
-            _macros[4] = @"%FileNameOnly%|%Context\([^)]*\)%";
+            _macros[4] = @"%FileNameOnly%";
             _macros[5] = @"%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
             _macros[6] = @"%Context\([^)]*\)%";
             _macros[7] = @"%UTCDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
@@ -104,6 +105,7 @@ namespace BizTalkComponents.PipelineComponents
             _macros[14] = @"%FileExtension%";
             _macros[15] = @"%OriginalPath%";
             _macros[16] = @"%OriginalFolder%";
+            _macros[17] = @"%FolderRange\([1-9]+,{0,1}[1-9]{0,}\)%";
 
             return String.Join("|", _macros);
 
@@ -152,15 +154,15 @@ namespace BizTalkComponents.PipelineComponents
             {
                 FileNameMissing = false;
 
-                var directory = Path.GetDirectoryName(ReceivedFileName);
+                Directory = Path.GetDirectoryName(ReceivedFileName);
 
-                if (String.IsNullOrEmpty(directory) == false)
+                if (String.IsNullOrEmpty(Directory) == false)
                 {
-                    var folderStructure = directory.Split(new string[] { @"\" }, StringSplitOptions.RemoveEmptyEntries);
+                    var folderStructure = Directory.Split(new string[] { @"\" }, StringSplitOptions.RemoveEmptyEntries);
 
                     OriginalFolder = folderStructure[folderStructure.Length - 1];
 
-                    var firstFolder = directory.StartsWith(@"\\") ? 0 : 1;
+                    var firstFolder = Directory.StartsWith(@"\\") ? 0 : 1;
 
                     OriginalPath = String.Join(@"\", folderStructure, firstFolder, folderStructure.Length - firstFolder);
                 }
@@ -286,6 +288,12 @@ namespace BizTalkComponents.PipelineComponents
                 {
                     transport = transport.Replace(match.Value, OriginalFolder);
                 }
+                else if (match.Value.StartsWith("%FolderRange("))
+                {
+                    transport = FolderRange(transport, match);
+                }
+
+                
             }
                 //2018-03-12 Added %Root% Message root node
                 //2021-05-06 moved above Folder makro
@@ -354,6 +362,30 @@ namespace BizTalkComponents.PipelineComponents
 
         #region Private methods
 
+        string FolderRange(string input, Match match)
+        {
+            if (Directory == null)
+                throw new ArgumentNullException("Directory is empty");
+
+            Match innerMatch = Regex.Match(match.Value, @"%FolderRange\(([1-9]+),{0,1}([1-9]{0,})\)%");
+
+            var startindex = Convert.ToInt32(innerMatch.Groups[1].Value);
+
+            var count = String.IsNullOrEmpty(innerMatch.Groups[2].Value) ? 1 : Convert.ToInt32(innerMatch.Groups[2].Value);
+
+            string[] folders = Directory.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+
+
+            if (startindex + count > folders.Length)
+                throw new ArgumentOutOfRangeException($"Startindex {startindex} and count {count} is creater then folder array length {folders.Length}");
+
+            string val = String.Join(@"\", folders, startindex, count);
+
+
+            input = input.Replace(match.Value, (string)val);
+
+            return input;
+        }
         private Credentials GetSSOCredentials(string affiliate)
         {
             string externalUsername;

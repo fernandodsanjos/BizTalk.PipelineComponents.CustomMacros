@@ -2,13 +2,13 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>BizTalkComponents.PipelineComponents.CustomMacros</id>
-    <version>2.0.3.1</version>
+    <version>2.0.3.2</version>
     <authors>Fernando Pires</authors>
     <owners>Fernando Pires</owners>
 <projectUrl>https://github.com/fernandodsanjos/BizTalk.PipelineComponents.CustomMacros</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BizTalk Custom Macros PipelineComponents</description>
-    <releaseNotes>FIXED a BUG regarding macros OriginalPath and OriginalFolder</releaseNotes>
+    <releaseNotes>Added FolderRange macro</releaseNotes>
   </metadata>
 <files>
 	<file src="BizTalk2016\PipelineComponent\bin\debug\BizTalkComponents.PipelineComponents.CustomMacros.dll" target="lib\net46" />
