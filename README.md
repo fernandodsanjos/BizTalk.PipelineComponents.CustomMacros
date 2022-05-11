@@ -96,4 +96,5 @@ The component also handle groups in RegEx expression. For example if the express
 _Only the first RegEx group will be returned._
 
 **%FileExtension%** Returns the fileextension from sourcefilename.<br/>
+Example: If incomming filename is  P123789.txt then .txt will be returned.
 
