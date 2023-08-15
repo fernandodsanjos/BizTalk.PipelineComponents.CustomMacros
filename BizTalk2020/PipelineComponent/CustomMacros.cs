@@ -89,7 +89,7 @@ namespace BizTalkComponents.PipelineComponents
 
             //%Folder% = Adds a backslash
 
-            string[] _macros = new string[18];
+            string[] _macros = new string[19];
             _macros[0] = @"%FilePattern\([^%]+\)%";
             _macros[1] = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
             _macros[2] = @"%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
@@ -108,6 +108,7 @@ namespace BizTalkComponents.PipelineComponents
             _macros[15] = @"%OriginalPath%";
             _macros[16] = @"%OriginalFolder%";
             _macros[17] = @"%FolderRange\([1-9]+,{0,1}[1-9]{0,}\)%";
+            _macros[18] = @"%Nearest\([^%]+\)%";
 
             return String.Join("|", _macros);
 
@@ -297,7 +298,12 @@ namespace BizTalkComponents.PipelineComponents
                 {
                     transport = FolderRange(transport, match);
                 }
-
+                else if (match.Value.StartsWith("%Nearest("))
+                {
+                    
+                    transport = Nearest(transport, ReceivedFileName, match);
+                }
+                
 
             }
             //2018-03-12 Added %Root% Message root node
@@ -848,7 +854,97 @@ namespace BizTalkComponents.PipelineComponents
 
         }
 
+        private string Nearest(string transport, string filename, Match match)
+        {
 
+            string originalMatch = match.Value;
+
+            //Extract inner match
+            Match innerMatch = Regex.Match(match.Value, @"%Nearest\((.*)\)%");
+
+            string innerParts = GroupValue(innerMatch.Groups); //expression and comparer
+
+            //split expression and comparer
+            string[] parts = innerParts.Split(',');
+
+            //Run regex on filename
+            Match filenameMatch = Regex.Match(filename, parts[0]);
+
+            //Return first(enclosed) match
+            string compareTo = GroupValue(filenameMatch.Groups);
+
+            //Find nerest match
+            int nerest = CalculateNearest(Convert.ToInt32(compareTo), Convert.ToInt32(parts[1]));
+
+            //Assume always 2 numbers are to be returned
+            string result = nerest.ToString().PadLeft(2, '0');
+
+            //Replace every occurance with the same macro signature
+            return transport.Replace(originalMatch, result);
+
+        }
+
+        /// <summary>
+        /// Calcluate nearest number
+        /// </summary>
+        /// <param name="compareTo">Value to compare with derived from timestamp</param>
+        /// <param name="comparer">Nearest to</param>
+        /// <returns></returns>
+        private  int CalculateNearest(int compareTo, int comparer)
+        {
+            int result = 0;
+
+            if (compareTo < comparer)
+            {
+                result = 0;
+            }
+            else
+            {
+                int remainder = compareTo / comparer;
+
+                result = (remainder * comparer);
+            }
+
+
+            return result;
+
+
+
+        }
+
+        private int[] ToArray(string[] strings, int offset = 0)
+        {
+            int[] result = new int[strings.Length - offset];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Convert.ToInt32(strings[i + offset]);
+            }
+
+
+            return result;
+
+        }
+
+        /// <summary>
+        /// Return first (enclosed) match
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns>first match</returns>
+        private string GroupValue(GroupCollection group)
+        {
+            if (group.Count == 0)
+                return String.Empty;
+
+            int index = 1;
+            if (group.Count == 1)
+            {
+                index = 0;
+            }
+
+            return group[index].Value.Trim();
+
+        }
         #endregion
 
 
