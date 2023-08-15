@@ -12,6 +12,12 @@ Adds custom SendPort macros, works for both Filename and folder<br/>
 ## Macros
 If the PipelineComponent is used in any stage in a sendport pipeline, the following custom macros will be available
 
+**%Nearest(#,#)%** <br/> Used to modify timestamp in the filename as sometimes you need to make sure two files has the same timestamp even though they are created in different processes.<br/>Consider two files named certificates_2023080813**3030**.csv and competences_2023080813**3133**.csv and where specification says the timestamp must be the same for both files.
+<br/>Using the following file pattern %FilePattern([a-z]+_[0-9]{8})%**%Nearest(([0-9]{2})[0-9]{2}[.],30)%00.csv** the files will be renamed to certificates_202308081**33000**.csv and competences_2023080813**3000**.csv
+<br/>First part uses **FilePattern** macro to extract the beginning of thte filename. **Nearest** macro picks out the minut part of the datetime and calculates it to the nearest 30 min window (second parameter). 
+In this sample seconds have been hardcoded to 00.<br/><br/>
+
+
 ![Example](/MacroFolder.JPG?raw=true "Example")
 
 **%ParentFolder%**<br/> Returnes the parent folder to original source folder.<br/>
