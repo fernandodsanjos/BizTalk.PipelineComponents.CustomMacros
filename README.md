@@ -18,13 +18,13 @@ If the PipelineComponent is used in any stage in a sendport pipeline, the follow
 In this sample seconds have been hardcoded to 00.<br/><br/>
 
 
-![Example](/MacroFolder.JPG?raw=true "Example")
-
 **%ParentFolder%**<br/> Returnes the parent folder to original source folder.<br/>
 
 **%FolderRange(#,#)%**<br/> Return a folder or folderpath part from incomming file. <br/>
 Example if original folderpath is **\\\\server\folder1\folder2\folder3\filename.txt**<br/>
 Then **%FolderRange(2,2)%** returns  folder1\folder2<br/>If **%FolderRange(2)%** is used then folder2 is returned.<br/>
+
+![Example](/MacroFolder.JPG?raw=true "Example")
 
 **%OriginalPath%**<br/> Folder structure from incomming file, volume or drive letter excluded. 
 If inboundlocation is **D:\Integrations\Incomming\file.txt** then the macro returns **Integrations\Incomming**.<br/>
