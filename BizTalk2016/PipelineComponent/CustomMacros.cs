@@ -89,7 +89,7 @@ namespace BizTalkComponents.PipelineComponents
 
             //%Folder% = Adds a backslash
 
-            string[] _macros = new string[19];
+            string[] _macros = new string[21];
             _macros[0] = @"%FilePattern\([^%]+\)%";
             _macros[1] = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
             _macros[2] = @"%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
@@ -109,6 +109,9 @@ namespace BizTalkComponents.PipelineComponents
             _macros[16] = @"%OriginalFolder%";
             _macros[17] = @"%FolderRange\([1-9]+,{0,1}[1-9]{0,}\)%";
             _macros[18] = @"%Nearest\([^%]+\)%";
+            _macros[19] = @"%IF\([^%]+\)%";
+            _macros[20] = @"%TimeStamp\([^%]+\)%";
+            
 
             return String.Join("|", _macros);
 
@@ -303,7 +306,16 @@ namespace BizTalkComponents.PipelineComponents
 
                     transport = Nearest(transport, ReceivedFileName, match);
                 }
+                else if (match.Value.StartsWith("%IF("))
+                {
 
+                    transport = IF(transport, ReceivedFileName, match);
+                }
+                else if (match.Value.StartsWith("%TimeStamp("))
+                {
+
+                    transport = TimeStamp(transport, ReceivedFileName, match);
+                }
 
             }
             //2018-03-12 Added %Root% Message root node
@@ -378,6 +390,77 @@ namespace BizTalkComponents.PipelineComponents
 
         #region Private methods
 
+        private string IF(string transport, string filename, Match match)
+        {
+            Match internalMatch = Regex.Match(match.Value, @"%IF\((.*)\)%");
+
+            string[] parts = GroupValue(internalMatch.Groups).Split(',');
+
+            Match ifmatch = Regex.Match(filename, parts[0]);
+
+            string replaceWith = parts.Length > 2 ? parts[2] : String.Empty;
+
+            if (ifmatch.Success)
+            {
+                replaceWith = parts[1];
+            }
+
+            transport = transport.Replace(internalMatch.Value, replaceWith);
+
+
+            return transport;
+
+
+        }
+
+        private string TimeStamp(string transport, string filename, Match match)
+        {
+            Match internalMatch = Regex.Match(match.Value, @"%TimeStamp\((.*)\)%");
+
+            string[] parts = GroupValue(internalMatch.Groups).Split(',');
+
+            Match timestamp = Regex.Match(filename, parts[0]);
+
+            //Get original 
+            string replaceWith = timestamp.Groups[0].Value;
+
+            for (int i = 1; i < timestamp.Groups.Count; i++)
+            {
+                if (timestamp.Groups[i].Length == 2)
+                {
+                    int comparer = Convert.ToInt32(parts.Length > i ? parts[i] : parts[parts.Length - 1]);
+
+                    string compareTo = timestamp.Groups[i].Value;
+
+                    int calculated = CalculateNearest(Convert.ToInt32(compareTo), comparer);
+
+                    replaceWith = ReplaceAt(replaceWith, timestamp.Groups[i].Index - (timestamp.Groups[0].Index), calculated.ToString());
+                }
+            }
+
+
+            transport = transport.Replace(internalMatch.Value, replaceWith);
+
+
+            return transport;
+
+
+        }
+
+
+        /// <summary>
+        /// Replace with position
+        /// </summary>
+        /// <param name="str">source string</param>
+        /// <param name="index">start location to replace at (0-based)</param>
+        /// <param name="replace">string that is replacing characters</param>
+        /// <returns></returns>
+        private string ReplaceAt(string str, int index, string replace)
+        {
+            return str.Remove(index, replace.Length)
+                    .Insert(index, replace);
+        }
+
         private string Nearest(string transport, string filename, Match match)
         {
 
@@ -397,11 +480,17 @@ namespace BizTalkComponents.PipelineComponents
             //Return first(enclosed) match
             string compareTo = GroupValue(filenameMatch.Groups);
 
-            //Find nerest match
-            int nerest = CalculateNearest(Convert.ToInt32(compareTo), Convert.ToInt32(parts[1]));
+            //In case time part is zero(0)
+            string result = "00";
 
-            //Assume always 2 numbers are to be returned
-            string result = nerest.ToString().PadLeft(2, '0');
+            if (compareTo.Trim() == result)
+            {
+                //Find nerest match
+                int nerest = CalculateNearest(Convert.ToInt32(compareTo), Convert.ToInt32(parts[1]));
+
+                //Assume always 2 numbers are to be returned
+                result = nerest.ToString().PadLeft(2, '0');
+            }
 
             //Replace every occurance with the same macro signature
             return transport.Replace(originalMatch, result);
