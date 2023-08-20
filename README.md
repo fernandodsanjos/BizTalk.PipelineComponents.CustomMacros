@@ -6,11 +6,17 @@ Adds custom SendPort macros, works for both Filename and folder<br/>
 |Name|Description|
 |--|--|
 |Must Exist|Target folder path must exist.|
-|Context Required|An erro is thrown if the specified Context cannot be found|
+|Context Required|An error is thrown if the specified Context cannot be found|
 |SSOAffiliate|Use SSO Application instead of host user|
 
 ## Macros
 If the PipelineComponent is used in any stage in a sendport pipeline, the following custom macros will be available
+
+**%IF(#,#,#)%**<br/> If the expression (first parameter) is matched in any way the second parameter will be returned or else the last parameter (else) will be returned<br/>
+Example: outbound transport location is **c:\Volvo\Cars\V40\cars.vsc** and the macro is **Cars_%IF(XC40,SUV,Regular)%.xml** then **Cars_Regular.xml** will be returned.<br/>
+
+**%TimeStamp(#,#,..)%** <br/> Used to modify timestamp much like the _Nearest Macro_ except with TimeStamp macro you can modify **multiple** placeholders and the **complete modified** timestamp will be returned.<br/>
+Example: outbound transport location is **\\\\share\\DC\\certificates_%TimeStamp([0-9]{8}([0-9]{2})[0-9]{2}([0-9]{2}),5,4)%.xml** then macro will return **certificates_20230808003032.xml** where hour and seconds are modified before returning the complete modified timestamp.<br/>
 
 **%Nearest(#,#)%** <br/> Used to modify timestamp in the filename as sometimes you need to make sure two files has the same timestamp even though they are created in different processes.<br/>Consider two files named certificates_2023080813**3030**.csv and competences_2023080813**3133**.csv and where specification says the timestamp must be the same for both files.
 <br/>Using the following file pattern %FilePattern([a-z]+_[0-9]{8})%**%Nearest(([0-9]{2})[0-9]{2}[.],30)%00.csv** the files will be renamed to certificates_202308081**33000**.csv and competences_2023080813**3000**.csv
