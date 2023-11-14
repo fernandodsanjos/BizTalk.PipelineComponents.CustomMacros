@@ -434,7 +434,7 @@ namespace BizTalkComponents.PipelineComponents
 
                     int calculated = CalculateNearest(Convert.ToInt32(compareTo), comparer);
 
-                    replaceWith = ReplaceAt(replaceWith, timestamp.Groups[i].Index - (timestamp.Groups[0].Index), calculated.ToString());
+                    replaceWith = ReplaceAt(replaceWith, timestamp.Groups[i].Index - (timestamp.Groups[0].Index), calculated.ToString().PadLeft(2, '0'));
                 }
             }
 
