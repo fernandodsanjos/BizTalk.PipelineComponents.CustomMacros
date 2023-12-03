@@ -77,9 +77,23 @@ If inboundlocation is **D:\Integrations\Incomming\file.txt** then the macro retu
 **%FileDateTime(#)%**<br/> Works like the %DateTime% macro but it uses the FileCreationTime instead.<br/>
 
 **%Context(#)%**<br/>     Use any value from standard context values<br/>
-                  Example _%Context(BTS.InterchangeID)%_ returns the InterchageID of the message.<br/>
-				  Custom context can also be applied by using the prefix CST. A search will be done through all none MS context properties until a match is made.<br/>
-                *Distinguished fields*
+                  Example _%Context(BTS.InterchangeID)%_ returns the InterchageID of the message.<br/><br/>
+**Available standard Context**
+  - SBMessaging: http://schemas.microsoft.com/BizTalk/2012/Adapter/BrokeredMessage-properties
+  - POP3: http://schemas.microsoft.com/BizTalk/2003/pop3-properties
+  - MSMQT: http://schemas.microsoft.com/BizTalk/2003/msmqt-properties
+  - ErrorReport: http://schemas.microsoft.com/BizTalk/2005/error-report
+  - EdiOverride: http://schemas.microsoft.com/BizTalk/2006/edi-properties
+  - EDI: http://schemas.microsoft.com/Edi/PropertySchema
+  - EdiIntAS: http://schemas.microsoft.com/BizTalk/2006/as2-properties
+  - BTF2: http://schemas.microsoft.com/BizTalk/2003/btf2-properties
+  - BTS: http://schemas.microsoft.com/BizTalk/2003/system-properties
+  - FILE: http://schemas.microsoft.com/BizTalk/2003/file-properties
+  - MessageTracking: http://schemas.microsoft.com/BizTalk/2003/file-properties
+  - AzureStorage: http://schemas.microsoft.com/BizTalk/Adapter/AzureStorage-properties
+
+**Custom Context**<br/>Custom context can also be applied by using the prefix CST. A search will be done through all none MS context properties until a match is made.<br/>
+                **Distinguished Fields**<br/>
                   It is possible to use distinguished fields by adding a filename friendly xpath variant. This is a better alternative then using unnecessary promoted properties.<br/>
                   Example: 
                   If the distinguished xpath looks like bellow
