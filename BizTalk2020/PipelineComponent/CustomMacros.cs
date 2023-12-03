@@ -130,6 +130,7 @@ namespace BizTalkComponents.PipelineComponents
             propertys.Add("BTS", "http://schemas.microsoft.com/BizTalk/2003/system-properties");
             propertys.Add("FILE", "http://schemas.microsoft.com/BizTalk/2003/file-properties");
             propertys.Add("MessageTracking", "http://schemas.microsoft.com/BizTalk/2003/file-properties");
+            propertys.Add("AzureStorage", "http://schemas.microsoft.com/BizTalk/Adapter/AzureStorage-properties");
 
         }
 

@@ -8,7 +8,7 @@
 <projectUrl>https://github.com/fernandodsanjos/BizTalk.PipelineComponents.CustomMacros</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>BizTalk Custom Macros PipelineComponents</description>
-    <releaseNotes>Small FIX for Timestamp</releaseNotes>
+    <releaseNotes>Added AzureStorage properties to Context macro</releaseNotes>
   </metadata>
 <files>
 	<file src="BizTalk2016\PipelineComponent\bin\debug\BizTalkComponents.PipelineComponents.CustomMacros.dll" target="lib\net46" />
