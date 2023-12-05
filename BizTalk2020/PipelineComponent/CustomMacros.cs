@@ -81,8 +81,6 @@ namespace BizTalkComponents.PipelineComponents
         //2019-03-14 Updated FilePattern so that it can handle captures (...)
         readonly string macros = Macros();
 
-        //readonly string macros = @"%FilePattern\([^%]+\)%|%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%|%FileNameOnly%|%Context\([^)]*\)%|%DateTimeFormat\([~a-zA-Z0-9\. ]+[,]{1}[-dfFghHKmMsStyz: ]+\)%";
-
         static private string Macros()
         {
             //2020-04-06 Added array to easier add new macros and see what macros already exists
@@ -111,7 +109,7 @@ namespace BizTalkComponents.PipelineComponents
             _macros[18] = @"%Nearest\([^%]+\)%";
             _macros[19] = @"%IF\([^%]+\)%";
             _macros[20] = @"%TimeStamp\([^%]+\)%";
-
+            _macros[21] = @"%ReceivedBlobFileName%";
             return String.Join("|", _macros);
 
         }
@@ -315,6 +313,17 @@ namespace BizTalkComponents.PipelineComponents
                 {
 
                     transport = TimeStamp(transport, ReceivedFileName, match);
+                }
+                else if(match.Value == "%ReceivedBlobFileName%")
+                {
+                    val = pInMsg.Context.Read("ReceivedBlobName", propertys["AzureStorage"]);
+                    if (val == null || String.IsNullOrWhiteSpace((string)val))
+                    {
+                        transport = transport.Replace(match.Value, String.Empty);
+                        continue;
+                    }
+                    string fileName = Path.GetFileName((string)val);
+                    transport = transport.Replace("%ReceivedBlobFileName%", fileName);
                 }
 
             }
