@@ -87,7 +87,7 @@ namespace BizTalkComponents.PipelineComponents
 
             //%Folder% = Adds a backslash
 
-            string[] _macros = new string[21];
+            string[] _macros = new string[22];
             _macros[0] = @"%FilePattern\([^%]+\)%";
             _macros[1] = @"%DateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
             _macros[2] = @"%ReceivedDateTime\([%YyMmDdTHhSs:\-fzZkK\s]*\)%";
