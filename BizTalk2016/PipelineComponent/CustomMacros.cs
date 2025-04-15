@@ -340,45 +340,43 @@ namespace BizTalkComponents.PipelineComponents
             if (transport.Contains("%Folder%"))
             {
                 transport = transport.Replace("%Folder%", @"\");
+            }
 
-                string transportType = (string)pInMsg.Context.Read("OutboundTransportType", ns_BTS);
+            string transportType = (string)pInMsg.Context.Read("OutboundTransportType", ns_BTS);
+
+            //Make sure folder structure exists
+            if (transportType == "FILE")
+            {
                 string dirname = Path.GetDirectoryName(transport);
 
-                if (transportType == "FILE")
+                //2021-05-06 Added affiliate for impersonation
+                if (String.IsNullOrEmpty(SSOAffiliate))
+                {
+                    if (System.IO.Directory.Exists(dirname) == false && MustExist)
+                        throw new DirectoryNotFoundException($"Directory {dirname} not found");
+
+                    //Will create the new directory structure if it does not exist
+                    System.IO.Directory.CreateDirectory(dirname);
+
+                }
+                else
                 {
 
+                    var cred = GetSSOCredentials(SSOAffiliate);
 
-                    //2021-05-06 Added affiliate for impersonation
-                    if (String.IsNullOrEmpty(SSOAffiliate))
+                    using (Impersonate imp = new Impersonate(cred.Username, cred.Password))
                     {
                         if (System.IO.Directory.Exists(dirname) == false && MustExist)
                             throw new DirectoryNotFoundException($"Directory {dirname} not found");
 
+
                         //Will create the new directory structure if it does not exist
                         System.IO.Directory.CreateDirectory(dirname);
-
-                    }
-                    else
-                    {
-
-                        var cred = GetSSOCredentials(SSOAffiliate);
-
-                        using (Impersonate imp = new Impersonate(cred.Username, cred.Password))
-                        {
-                            if (System.IO.Directory.Exists(dirname) == false && MustExist)
-                                throw new DirectoryNotFoundException($"Directory {dirname} not found");
-
-
-                            //Will create the new directory structure if it does not exist
-                            System.IO.Directory.CreateDirectory(dirname);
-                        };
-                    }
-
-
+                    };
                 }
 
-            }
 
+            }
 
 
             pInMsg.Context.Promote("OutboundTransportLocation", ns_BTS, (object)transport);
